@@ -2,90 +2,101 @@ import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-
-import java.io.File;
 
 // JavaFX Application main entry point
 public class App extends Application {
-
-    // To display images
-    private ImageView imageView = new ImageView();
-
-    // To open a file dialog for selecting images
-    private FileChooser fileChooser = new FileChooser();
-
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
-        /*
-         * TODO1: Set a title 'Image Uploader' for the stage
-         * Hint: You can do this by using the setTitle() method of the stage class
-         */
-        primaryStage.setTitle("Image Uploader");
+        primaryStage.setTitle("Recipe Run");
 
+        VBox mainBox = new VBox();
+        mainBox.setAlignment(Pos.TOP_CENTER);
 
-        /*
-         * TODO2: Create a button called ‘uploadButton’.The text on the button should say 'Upload Image'.
-         * Hint: You can do this by creating an instance of the Button class and passing the text 'Upload Image' as an argument to the constructor.
-         */
-        Button uploadButton = new Button("Upload Image");
+        // top titlebar
+        {
+            HBox titleHbox = new HBox();
+            titleHbox.setAlignment(Pos.CENTER_RIGHT);
+            Button newRecipe = new Button("New Recipe");
+            newRecipe.setMinHeight(50.0);
+            Region spacer = new Region();
+            spacer.setMinWidth(50.0);
+            titleHbox.getChildren().addAll(newRecipe, spacer);
+            mainBox.getChildren().add(titleHbox);
+        }
 
+        VBox scrollPaneContents = new VBox();
+        scrollPaneContents.setAlignment(Pos.TOP_CENTER);
+        for (int i = 0; i < 100; i++) {
+            StackPane recipePane = new StackPane();
 
-        // Call uploadImage method on button click
-        uploadButton.setOnAction(e -> uploadImage(primaryStage));
+            HBox.setHgrow(recipePane, Priority.ALWAYS);
 
-        /*
-         * TODO3: Create a vertical box layout called ‘vbox’
-         * Hint: You can do this by creating an instance of the VBox class and passing uploadButton and imageView as arguments to the constructor.
-         */
-        VBox vbox = new VBox(uploadButton, imageView);
+            HBox recipeHbox = new HBox(20.0);
+            recipePane.getChildren().add(recipeHbox);
+            StackPane.setAlignment(recipeHbox, Pos.CENTER);
+            recipeHbox.setStyle("-fx-border-color: black; -fx-border-width: 1;");
 
+            recipeHbox.setMinHeight(100.0);
 
-        /*
-         * TODO4: Center align the contents of the vbox.
-         * Hint: You can use the setAlignment method of the VBox class and use Pos.CENTER as an argument for center alignment.
-         */
-        vbox.setAlignment(Pos.CENTER);
+            {
+                StackPane descPane = new StackPane();
+                HBox.setHgrow(descPane, Priority.ALWAYS);
 
+                BorderPane descInside = new BorderPane();
+                descInside.setPadding(new Insets(20.0));
+                descInside.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+                descPane.getChildren().add(descInside);
 
-        /*
-         * TODO5: Create a scene called 'scene' using the vbox. Specify the height as 200 and width as 200.
-         * Hint: You can implement this by creating an instance of the Scene class and passing vbox, height and width as arguments to the constructor.
-         */
-        Scene scene =  new Scene(vbox, 200, 200);
+                // recipe title
+                Label title = new Label("Recipe");
+                title.setAlignment(Pos.CENTER_LEFT);
+                BorderPane.setAlignment(title, Pos.CENTER_LEFT);
+                descInside.setLeft(title);
 
+                // recipe type
+                Label recipeType = new Label("Breakfast");
+                recipeType.setAlignment(Pos.CENTER_RIGHT);
+                BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
+                descInside.setRight(recipeType);
+
+                recipeHbox.getChildren().add(descPane);
+            }
+
+            {
+                StackPane delPane = new StackPane();
+                delPane.getChildren().add(new Button("Delete"));
+                delPane.setPadding(new Insets(20.0));
+                recipeHbox.getChildren().add(delPane);
+            }
+
+            recipePane.setPadding(new Insets(20.0));
+
+            scrollPaneContents.getChildren().add(recipePane);
+        }
+        // mainBox.getChildren().add(scrollPaneContents);
+        ScrollPane pane = new ScrollPane();
+        pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
+            scrollPaneContents.setPrefWidth(newValue.getWidth() - 1);
+        });
+        pane.setContent(scrollPaneContents);
+        mainBox.getChildren().add(pane);
+
+        Scene scene = new Scene(mainBox, 1280, 720);
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    private void uploadImage(Stage primaryStage) {
-
-        // Select which extensions are allowed
-        fileChooser.getExtensionFilters().add(new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg"));
-        File selectedFile = fileChooser.showOpenDialog(primaryStage);
-
-
-        if (selectedFile != null) {
-            Image image = new Image(selectedFile.toURI().toString());
-
-            /*
-             * TODO6: Set the selected image in imageView i.e. display the image.
-             * Hint: To implement this, you can use the setImage() method of ImageView and pass the selected image as an argument.
-             */
-            imageView.setImage(image);
-
-            // Resize the window to fit the image
-            primaryStage.setWidth(image.getWidth() + 100);
-            primaryStage.setHeight(image.getHeight() + 100);
-        }
     }
 }
