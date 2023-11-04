@@ -20,40 +20,68 @@ import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
-// JavaFX Application main entry point
-public class App extends Application {
+class newScreen extends VBox {
     private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
     private static final String API_KEY = "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";
     private static final String TOKEN = "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";
     private static final String MODEL1 = "whisper-1";
     private static final String MODEL2 = "text-davinci-003";
     private static final String RESPONSE = "Your response is: ";
-    
-    public static void main(String[] args) {
-        launch(args);
-    }
 
-    private void newScreen() {
-        Stage inputStage = new Stage();
+    private Button micButton;
+    private Button doneButton;
 
-        VBox inputBox = new VBox();
-        inputBox.setAlignment(Pos.TOP_CENTER);
+    private Label response;
 
-        HBox inputPrompt = new HBox();
-        inputPrompt.setAlignment(Pos.CENTER);
-        inputPrompt.setPrefSize(500, 500);
+    private Label recordingLabel;
 
-        Label response = new Label("Please select your meal type: Breakfast, Lunch, or Dinner");
-        response.setPrefSize(500, 500);
-        response.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-        response.setAlignment(Pos.CENTER);
-        
+    private AudioRecord aRecord;
 
-        Button micButton = new Button("Record");
+    private Stage inputStage;
+
+    private Scene scene;
+
+    String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";  
+
+    newScreen() {
+        inputStage = new Stage();
+
+        recordingLabel = new Label("Recording...");
+        recordingLabel.setAlignment(Pos.BOTTOM_CENTER);
+        recordingLabel.setStyle(defaultLabelStyle);
+
+        aRecord = new AudioRecord(recordingLabel);
+
+        this.setAlignment(Pos.TOP_CENTER);
+        this.setPrefSize(500, 800);
+
+        doneButton = new Button("Done");
+        doneButton.setMinHeight(25.0);
+        doneButton.setAlignment(Pos.BOTTOM_CENTER);
+
+        micButton = new Button("Record");
         micButton.setMinHeight(25.0);
         micButton.setAlignment(Pos.BOTTOM_CENTER);
+
+        response = new Label();
+        response.setPrefSize(500, 500);
+        response.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+        response.setAlignment(Pos.CENTER); 
+    }
+
+    public void voiceInputScreen() {
+
         micButton.setOnAction(e -> {
             try {
+                aRecord.startRecording();
+            } catch (Exception exc) {
+                exc.printStackTrace();
+            }
+        });
+
+        doneButton.setOnAction(e -> {
+            try {
+                aRecord.stopRecording();
                 String voiceString = RESPONSE;
                 voiceString += getVoiceInput();
                 response.setText(voiceString);
@@ -61,36 +89,24 @@ public class App extends Application {
                 exc.printStackTrace();
             }
         });
-        
-        inputPrompt.getChildren().add(response);
-        
-        Button doneButton = new Button("Done");
-        doneButton.setMinHeight(25.0);
-        doneButton.setAlignment(Pos.BOTTOM_CENTER);
-        doneButton.setOnAction(e -> {
-            try {
 
-            } catch (Exception exc) {
-                exc.printStackTrace();
-            }
-        });
+        this.getChildren().addAll(response, micButton, doneButton, recordingLabel);
+        this.setSpacing(15);
 
-        inputBox.getChildren().addAll(inputPrompt, micButton, doneButton);
-        inputBox.setSpacing(15);
 
-        Scene scene = new Scene(inputBox, 600, 600);
+        scene = new Scene(this, 600, 600);
 
         inputStage.setTitle("Create Recipe");
         inputStage.setResizable(false);
         inputStage.setScene(scene);
-        inputStage.show(); 
+        inputStage.show();
     }
 
-    private String getVoiceInput()throws IOException, URISyntaxException{
-        ChatGPT voiceInput = new ChatGPT();
+    private String getVoiceInput()throws Exception{
+        Whisper voiceInput = new Whisper();
 
         // Create file object from file path
-        String path = "/Users/chaupham/Downloads/test.m4a";
+        String path = "recording.wav";
         File file = new File(path);
         
         String result = voiceInput.handleVoiceInput(file, API_ENDPOINT, TOKEN, MODEL1);
@@ -98,15 +114,31 @@ public class App extends Application {
         return result;
     }
 
-    private String processVoiceInput()throws Exception{
-        ChatGPT recipe = new ChatGPT();
-        String result = recipe.processInput(API_ENDPOINT, API_KEY, MODEL2);
-        return result;
+    /*
+     * For Creat Recipe
+     */
+
+    // private String processVoiceInput()throws Exception{
+    //     ChatGPT recipe = new ChatGPT();
+    //     String result = recipe.processInput(API_ENDPOINT, API_KEY, MODEL2);
+    //     return result;
+    // }
+}
+
+// JavaFX Application main entry point
+public class App extends Application {
+
+    private newScreen ns;
+
+    public static void main(String[] args) {
+        launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Recipe Run");
+
+        ns = new newScreen();
 
         VBox mainBox = new VBox();
         mainBox.setAlignment(Pos.TOP_CENTER);
@@ -117,7 +149,7 @@ public class App extends Application {
             titleHbox.setAlignment(Pos.CENTER_RIGHT);
             Button newRecipe = new Button("New Recipe");
             newRecipe.setOnMouseClicked(e -> {
-                newScreen();
+                ns.voiceInputScreen();
             });
             newRecipe.setMinHeight(50.0);
             Region spacer = new Region();
