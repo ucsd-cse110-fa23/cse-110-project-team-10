@@ -1,19 +1,25 @@
-## Getting Started
+# Team 10 App
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
 
-## Folder Structure
+# How to run
+Put something like this:
+```json
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+       {
+            "type": "java",
+            "name": "App",
+            "request": "launch",
+            "mainClass": "App.Main",
+            "projectName": "cse-110-project-team-10_71909f5d",
+            "vmArgs": "--module-path 'C:\\Users\\camer\\Documents\\openjfx-21_windows-x64_bin-sdk\\javafx-sdk-21\\lib' --add-modules javafx.controls,javafx.fxml"
+        }
+    ]
+}
+```
 
-The workspace contains two folders by default, where:
-
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
-# cse-110-project-team-10
+In your .vscode/launch.json file, but replace that hardcoded path with wherever your openjfx download is. Projectname might also be wrong, but hopefully not!

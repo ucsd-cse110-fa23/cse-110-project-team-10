@@ -1,0 +1,5 @@
+# Has hardcoded path
+.vscode/launch.json
+
+# This is a build file?
+bin/App.class
