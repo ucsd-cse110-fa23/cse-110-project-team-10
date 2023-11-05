@@ -4,6 +4,10 @@ import org.json.*;
 
 
 public class Whisper {
+    private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
+    private static final String TOKEN = "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";
+    private static final String MODEL = "whisper-1";
+
     // Helper method to write a parameter to the output stream in multipart form data format
     private static void writeParameterToOutputStream(OutputStream outputStream, String parameterName,
         String parameterValue, String boundary) throws IOException {
@@ -75,7 +79,7 @@ public class Whisper {
         return errorResult;
     }
 
-    public String handleVoiceInput(File file, String API_ENDPOINT, String TOKEN, String MODEL) throws IOException, URISyntaxException{
+    public String handleVoiceInput(File file) throws IOException, URISyntaxException{
         URL url = new URI(API_ENDPOINT).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");

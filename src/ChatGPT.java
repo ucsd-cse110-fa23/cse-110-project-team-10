@@ -6,7 +6,11 @@ import java.io.*;
 import java.net.*;
 import org.json.*;
 public class ChatGPT {
-    public String processInput(String API_ENDPOINT, String API_KEY, String MODEL)throws Exception{
+    private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
+    private static final String API_KEY = "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";
+    private static final String MODEL = "text-davinci-003";
+
+    public String processInput()throws Exception{
         // Set request parameters
         String prompt = "";
         int maxTokens = 100;

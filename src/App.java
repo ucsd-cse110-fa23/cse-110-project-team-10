@@ -20,16 +20,66 @@ import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
-class newScreen extends VBox {
-    private static final String API_ENDPOINT = "https://api.openai.com/v1/audio/transcriptions";
-    private static final String API_KEY = "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";
-    private static final String TOKEN = "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";
-    private static final String MODEL1 = "whisper-1";
-    private static final String MODEL2 = "text-davinci-003";
-    private static final String RESPONSE = "Your response is: ";
-
+class Footer extends HBox{
     private Button micButton;
     private Button doneButton;
+    private Button nextButton;
+    private boolean isRecord;
+
+    Footer(){
+        this.setPrefSize(500, 60);
+        this.setSpacing(15);
+
+        doneButton = new Button("Done");
+        doneButton.setMinHeight(25.0);
+
+        micButton = new Button("Record");
+        micButton.setMinHeight(25.0);
+        isRecord = false;
+
+        nextButton = new Button("Next");
+        nextButton.setMinHeight(25.0);
+
+        this.getChildren().addAll(micButton, nextButton, doneButton);
+        this.setAlignment(Pos.CENTER);
+    }
+
+    public void toggleRecord(){
+        if(!isRecord){
+            isRecord = true;
+        }
+        else{
+            isRecord = false;
+        }
+    }
+
+    public Button getMicButton() {
+        return this.micButton;
+    }
+
+    public Button getDoneButton() {
+        return this.doneButton;
+    }
+
+    public Button getNextButton() {
+        return this.nextButton;
+    }
+
+    public boolean getRecordStatus(){
+        return isRecord;
+    }
+}
+
+class newScreen extends VBox {
+    
+    private static final String RESPONSE = "Your response is: ";
+    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
+    private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
+
+    private Footer footer;
+    private Button micButton;
+    private Button doneButton;
+    private Button nextButton;
 
     private Label response;
 
@@ -55,13 +105,10 @@ class newScreen extends VBox {
         this.setAlignment(Pos.TOP_CENTER);
         this.setPrefSize(500, 800);
 
-        doneButton = new Button("Done");
-        doneButton.setMinHeight(25.0);
-        doneButton.setAlignment(Pos.BOTTOM_CENTER);
-
-        micButton = new Button("Record");
-        micButton.setMinHeight(25.0);
-        micButton.setAlignment(Pos.BOTTOM_CENTER);
+        footer = new Footer();
+        micButton = footer.getMicButton();
+        nextButton = footer.getNextButton();
+        doneButton = footer.getDoneButton();
 
         response = new Label();
         response.setPrefSize(500, 500);
@@ -70,27 +117,37 @@ class newScreen extends VBox {
     }
 
     public void voiceInputScreen() {
+        response.setText(MEAL_PROMPT);
 
         micButton.setOnAction(e -> {
             try {
-                aRecord.startRecording();
+                footer.toggleRecord();
+                if(footer.getRecordStatus())
+                    aRecord.startRecording();
+                else{
+                    aRecord.stopRecording();
+                    String voiceString = RESPONSE;
+                    voiceString += getVoiceInput();
+                    response.setText(voiceString);
+                }
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
+        });
+
+        nextButton.setOnAction(e -> {
+            response.setText(INGREDIENT_PROMPT);
         });
 
         doneButton.setOnAction(e -> {
             try {
-                aRecord.stopRecording();
-                String voiceString = RESPONSE;
-                voiceString += getVoiceInput();
-                response.setText(voiceString);
+                
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
         });
 
-        this.getChildren().addAll(response, micButton, doneButton, recordingLabel);
+        this.getChildren().addAll(response, footer, recordingLabel);
         this.setSpacing(15);
 
 
@@ -109,7 +166,7 @@ class newScreen extends VBox {
         String path = "recording.wav";
         File file = new File(path);
         
-        String result = voiceInput.handleVoiceInput(file, API_ENDPOINT, TOKEN, MODEL1);
+        String result = voiceInput.handleVoiceInput(file);
 
         return result;
     }
@@ -120,7 +177,7 @@ class newScreen extends VBox {
 
     // private String processVoiceInput()throws Exception{
     //     ChatGPT recipe = new ChatGPT();
-    //     String result = recipe.processInput(API_ENDPOINT, API_KEY, MODEL2);
+    //     String result = recipe.processInput();
     //     return result;
     // }
 }
