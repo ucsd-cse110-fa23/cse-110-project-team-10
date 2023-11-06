@@ -1,3 +1,5 @@
+package main;
+
 import java.util.ArrayList;
 
 import javafx.application.Application;
@@ -6,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -14,6 +17,15 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.IOException;
 
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
 enum RecipeKind {
@@ -30,6 +42,9 @@ class Recipe {
 
 // JavaFX Application main entry point
 public class App extends Application {
+
+    private postRecipeCreate prc;
+    
     public static void main(String[] args) {
         launch(args);
     }
@@ -93,11 +108,22 @@ public class App extends Application {
         VBox mainBox = new VBox();
         mainBox.setAlignment(Pos.TOP_CENTER);
 
+        String din = "dinner";
+        String il = "carrots, beef, salt, lettuce, tomatoes";
+        try {
+            prc = new postRecipeCreate(din, il);
+        } catch (IOException | InterruptedException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+
         // top titlebar
         {
             HBox titleHbox = new HBox();
             titleHbox.setAlignment(Pos.CENTER_RIGHT);
             Button newRecipe = new Button("New Recipe");
+            newRecipe.setOnMouseClicked(e -> {
+                prc.postRecipeCreateDisplay();
+            });
             newRecipe.setMinHeight(50.0);
             Region spacer = new Region();
             spacer.setMinWidth(50.0);
