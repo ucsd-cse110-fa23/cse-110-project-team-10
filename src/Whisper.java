@@ -79,7 +79,7 @@ public class Whisper {
         return errorResult;
     }
 
-    public String handleVoiceInput(File file) throws IOException, URISyntaxException{
+    public String handleVoiceInput(File file) throws Exception{
         URL url = new URI(API_ENDPOINT).toURL();
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -133,4 +133,9 @@ public class Whisper {
 
         return result;
     } 
+
+    public String transcibeMock(String s){
+        String mockString = "";
+        return mockString;
+    }
 }

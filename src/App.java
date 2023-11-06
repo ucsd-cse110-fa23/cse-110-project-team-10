@@ -1,9 +1,4 @@
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.*;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
