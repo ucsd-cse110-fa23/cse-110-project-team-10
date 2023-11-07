@@ -120,6 +120,7 @@ class newScreen extends VBox {
     public void voiceInputScreen() {
         response.setText(MEAL_PROMPT);
 
+        //Record user's response
         micButton.setOnAction(e -> {
             try {
                 footer.toggleRecord();
