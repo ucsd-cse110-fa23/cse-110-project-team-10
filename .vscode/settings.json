@@ -4,10 +4,6 @@
     "java.project.referencedLibraries": [
         "lib/**/*.jar"
     ],
-<<<<<<< HEAD
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "automatic"
-=======
-    "java.compile.nullAnalysis.mode": "automatic"
->>>>>>> f4aecb3 (...)
 }
