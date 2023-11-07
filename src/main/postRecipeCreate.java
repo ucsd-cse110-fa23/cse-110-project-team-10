@@ -1,5 +1,8 @@
 package main;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -16,20 +19,7 @@ import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.IOException;
-
 public class postRecipeCreate extends VBox {
-    
-    private static final String API_ENDPOINT = "https://api.openai.com/v1/completions";
-    private static final String API_KEY = "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";
-    private static final String MODEL = "text-davinci-003";
 
     public String rName; 
     public String rDesc;
@@ -42,9 +32,15 @@ public class postRecipeCreate extends VBox {
     private Scene scene;
 
     // display the generated recipe description in a new popout window
-    // pmt = passed meal type, pmd = passed meal description
-    public postRecipeCreate(String pmt, String pmd) throws IOException, InterruptedException, URISyntaxException {
-        String ro = recipeGenerate(pmt, pmd);
+    // pmt = passed meal type, pml = passed meal ingredient list
+    public postRecipeCreate(String pmt, String pml) {
+        recipeGenerate rg = new recipeGenerate(pmt, pml);
+        String ro = "";
+        try {
+            ro = rg.generate();
+        } catch (IOException | InterruptedException | URISyntaxException e) {
+            e.printStackTrace();
+        }
         rName = ro.substring(ro.indexOf(':')+2, ro.indexOf("Ingredients"));
         rDesc = ro.substring(ro.indexOf("Ingredients"));
 
@@ -99,38 +95,5 @@ public class postRecipeCreate extends VBox {
         postCreateStage.setResizable(false);
         postCreateStage.setScene(scene);
         postCreateStage.show();
-    }
-    
-    public String recipeGenerate(String rt, String rd) throws IOException, InterruptedException, URISyntaxException{
-        // Set request parameters
-        String prompt = "Make me a "+rt+" meal with the following ingredients: "+rd+". Start response with the format:'recipe name:___' and response can be no longer than 500 words. Include the meal type breakfast/lunch/dinner in the format in parentheses immediately after meal name";
-        int maxTokens = 550;
-        // Create a request body which you will pass into request object
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("model", MODEL);
-        requestBody.put("prompt", prompt);
-        requestBody.put("max_tokens", maxTokens);
-        requestBody.put("temperature", 1.0);
-
-        // Create the HTTP Client
-        HttpClient client = HttpClient.newHttpClient();
-        // Create the request object
-        HttpRequest request = HttpRequest
-        .newBuilder()
-        .uri(new URI(API_ENDPOINT))
-        .header("Content-Type", "application/json")
-        .header("Authorization", String.format("Bearer %s", API_KEY))
-        .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString())).build();
-        // Send the request and receive the response
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        // Process the response
-        String responseBody = response.body();
-
-        JSONObject responseJson = new JSONObject(responseBody);
-        JSONArray choices = responseJson.getJSONArray("choices");
-        String generatedText = choices.getJSONObject(0).getString("text");
-
-        // Return generated recipe as string
-        return generatedText;
     }
 }

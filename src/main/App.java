@@ -18,15 +18,6 @@ import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.io.IOException;
-
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
 enum RecipeKind {
     Breakfast,
@@ -110,11 +101,8 @@ public class App extends Application {
 
         String din = "dinner";
         String il = "carrots, beef, salt, lettuce, tomatoes";
-        try {
-            prc = new postRecipeCreate(din, il);
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            e.printStackTrace();
-        }
+        
+        prc = new postRecipeCreate(din, il);
 
         // top titlebar
         {
