@@ -1,4 +1,4 @@
-package main;
+package cse110_project;
 
 import java.net.URI;
 import java.net.URISyntaxException;
