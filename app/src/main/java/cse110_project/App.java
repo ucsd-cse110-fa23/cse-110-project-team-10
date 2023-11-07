@@ -85,6 +85,7 @@ class newScreen extends VBox {
     private Label response;
 
     private Label recordingLabel;
+    private Label infoLabel;
 
     private AudioRecord aRecord;
 
@@ -92,10 +93,14 @@ class newScreen extends VBox {
 
     private Scene scene;
 
+    private String infomation;
+
     String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";  
 
     newScreen() {
         inputStage = new Stage();
+
+        infomation = "Meal type: ";
 
         recordingLabel = new Label("Recording...");
         recordingLabel.setAlignment(Pos.BOTTOM_CENTER);
@@ -115,6 +120,11 @@ class newScreen extends VBox {
         response.setPrefSize(500, 500);
         response.setStyle("-fx-border-color: black; -fx-border-width: 1;");
         response.setAlignment(Pos.CENTER); 
+
+        infoLabel = new Label();
+        infoLabel.setPrefSize(500,500);
+        infoLabel.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+        infoLabel.setAlignment(Pos.CENTER); 
     }
 
     public void voiceInputScreen() {
@@ -130,7 +140,9 @@ class newScreen extends VBox {
                     aRecord.stopRecording();
                     String voiceString = RESPONSE;
                     voiceString += getVoiceInput();
+                    infomation += getVoiceInput() + "\n";
                     response.setText(voiceString);
+                    infoLabel.setText(infomation);
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
@@ -139,6 +151,7 @@ class newScreen extends VBox {
 
         nextButton.setOnAction(e -> {
             response.setText(INGREDIENT_PROMPT);
+            infomation += "\n" + "Ingredient: ";
         });
 
         doneButton.setOnAction(e -> {
@@ -149,7 +162,7 @@ class newScreen extends VBox {
             }
         });
 
-        this.getChildren().addAll(response, footer, recordingLabel);
+        this.getChildren().addAll(response, footer, recordingLabel, infoLabel);
         this.setSpacing(15);
 
 

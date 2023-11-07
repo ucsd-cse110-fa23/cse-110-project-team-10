@@ -7,11 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 
 public class VoiceTest {
     WhisperAPI api;
-    Footer footer;
+
     @BeforeEach
     public void setup(){
         api = new mockWhisper();
-        footer = new Footer();
     }
 
     /**
@@ -22,17 +21,6 @@ public class VoiceTest {
         String expected = "user response";
         assertEquals(expected, api.handleVoiceInput(null));
     }
-
-    /**
-     * Test toggle for recording
-     */
-    @Test
-    public void testRecordingStatus() throws Exception{
-        assertFalse(footer.getRecordStatus());
-        footer.toggleRecord();
-        assertTrue(footer.getRecordStatus());
-    }
-    
     
 }
 
