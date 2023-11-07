@@ -1,6 +1,6 @@
 package cse110_project;
 
-import main.recipeGenerate;
+import cse110_project.recipeGenerate;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
