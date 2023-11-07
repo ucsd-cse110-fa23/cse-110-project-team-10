@@ -1,4 +1,4 @@
-package test.main;
+package cse110_project;
 
 import main.recipeGenerate;
 
@@ -33,6 +33,7 @@ public class recipeGenerateTest {
         }
     }
 
+    //todo
     @Test
     void testNewRecipeButton() {
         assertTrue(true);
