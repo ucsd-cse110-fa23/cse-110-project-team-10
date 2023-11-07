@@ -33,7 +33,7 @@ application {
 
 run {
     // Add VM options for JavaFX.
-    jvmArgs = ['--module-path', 'C:/Users/Imagine_death/Desktop/openjfx-21_windows-x64_bin-sdk/javafx-sdk-21/lib', '--add-modules', 'javafx.controls,javafx.fxml']
+    jvmArgs = ['--module-path', '/Users/ethanxu/Desktop/javafx-sdk-21/lib', '--add-modules', 'javafx.controls,javafx.fxml']
 }
 
 tasks.named('test') {

@@ -6,6 +6,9 @@ package cse110_project;
 import java.io.*;
 import java.util.ArrayList;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 import javafx.application.Application;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -20,6 +23,85 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+
+class postRecipeCreate extends VBox {
+
+    public String rName; 
+    public String rDesc;
+
+    private Button saveRecipeButton; 
+    private Button editRecipeButton;
+    private Button backButton; 
+    private Label recipeDescription;
+    private Stage postCreateStage;
+    private Scene scene;
+
+    // display the generated recipe description in a new popout window
+    // pmt = passed meal type, pml = passed meal ingredient list
+    public postRecipeCreate(String pmt, String pml) {
+        recipeGenerate rg = new recipeGenerate(pmt, pml);
+        String ro = "";
+        try {
+            ro = rg.generate();
+        } catch (IOException | InterruptedException | URISyntaxException e) {
+            e.printStackTrace();
+        }
+        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf("Ingredients"));
+        rDesc = ro.substring(ro.indexOf("Ingredients"));
+
+        postCreateStage = new Stage();
+        
+        recipeDescription = new Label(ro);
+        recipeDescription.setAlignment(Pos.CENTER);
+        recipeDescription.setWrapText(true);
+
+        saveRecipeButton = new Button("save");
+        saveRecipeButton.setPrefSize(45, 15);
+        saveRecipeButton.setAlignment(Pos.CENTER);
+
+        editRecipeButton = new Button("edit");
+        editRecipeButton.setPrefSize(45, 15);
+        editRecipeButton.setAlignment(Pos.CENTER);
+
+        backButton = new Button("back");
+        backButton.setPrefSize(45, 15);
+        backButton.setAlignment(Pos.CENTER);
+
+        this.setPrefSize(500, 500);
+    }
+
+    public void postRecipeCreateDisplay() {
+        saveRecipeButton.setOnAction(e -> {
+            //todo
+            System.out.println(rName);
+            System.out.println(rDesc);
+        });
+        editRecipeButton.setOnAction(e -> {
+            //todo
+        });
+        backButton.setOnAction(e -> {
+            //todo
+        });
+
+        HBox buttonArea = new HBox();
+        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.setPadding(new Insets(10, 10, 10, 10));
+        buttonArea.setSpacing(199);
+
+        VBox recipeDetail = new VBox();
+        recipeDetail.getChildren().addAll(recipeDescription);
+        recipeDetail.setPadding(new Insets(10, 10, 10, 10));
+
+        this.getChildren().addAll(buttonArea, recipeDetail);
+
+        scene = new Scene(this, 550, 550);
+
+        postCreateStage.setTitle("Generated Recipe");
+        postCreateStage.setResizable(false);
+        postCreateStage.setScene(scene);
+        postCreateStage.show();
+    }
+}
 
 class Footer extends HBox{
     private Button micButton;
@@ -93,14 +175,21 @@ class newScreen extends VBox {
 
     private Scene scene;
 
-    private String infomation;
+    private String information;
+
+    private postRecipeCreate prc;
+
+    private String mealType ; 
+    private String mealList ; 
+
+    private boolean recordingIntoList = false; 
 
     String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";  
 
     newScreen() {
         inputStage = new Stage();
 
-        infomation = "Meal type: ";
+        information = "Meal type: ";
 
         recordingLabel = new Label("Recording...");
         recordingLabel.setAlignment(Pos.BOTTOM_CENTER);
@@ -138,11 +227,13 @@ class newScreen extends VBox {
                     aRecord.startRecording();
                 else{
                     aRecord.stopRecording();
-                    String voiceString = RESPONSE;
-                    voiceString += getVoiceInput();
-                    infomation += getVoiceInput() + "\n";
-                    response.setText(voiceString);
-                    infoLabel.setText(infomation);
+                    if (recordingIntoList) {
+                        mealList = getVoiceInput();
+                        infoLabel.setText(RESPONSE + mealList);
+                    } else {
+                        mealType = getVoiceInput();
+                        response.setText(RESPONSE + mealType);
+                    }
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
@@ -150,13 +241,19 @@ class newScreen extends VBox {
         });
 
         nextButton.setOnAction(e -> {
-            response.setText(INGREDIENT_PROMPT);
-            infomation += "\n" + "Ingredient: ";
+            recordingIntoList = !recordingIntoList;
+            if (recordingIntoList) {
+                infoLabel.setText(INGREDIENT_PROMPT);
+            } else {
+                response.setText(MEAL_PROMPT);
+            }
         });
 
         doneButton.setOnAction(e -> {
             try {
-                
+                prc = new postRecipeCreate(mealType, mealList);
+                prc.postRecipeCreateDisplay();
+                inputStage.close();
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
@@ -185,18 +282,7 @@ class newScreen extends VBox {
 
         return result;
     }
-
-    /*
-     * For Creat Recipe
-     */
-
-    // private String processVoiceInput()throws Exception{
-    //     ChatGPT recipe = new ChatGPT();
-    //     String result = recipe.processInput();
-    //     return result;
-    // }
 }
-
 
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
 enum RecipeKind {
