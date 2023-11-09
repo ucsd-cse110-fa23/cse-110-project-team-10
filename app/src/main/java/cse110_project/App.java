@@ -295,6 +295,7 @@ class Recipe {
     public RecipeKind kind;
     public String name = "";
     public String description = "";
+    
 }
 
 // JavaFX Application main entry point
@@ -309,9 +310,10 @@ public class App extends Application {
     private ArrayList<Recipe> recipes;
     private VBox recipesUI;
 
-    private void addRecipeUI(Recipe forRecipe) {
+    private void addRecipe(Recipe recipe) {
+            recipes.add(recipe);
             StackPane recipePane = new StackPane();
-
+            
             HBox.setHgrow(recipePane, Priority.ALWAYS);
 
             HBox recipeHbox = new HBox(20.0);
@@ -331,13 +333,13 @@ public class App extends Application {
                 descPane.getChildren().add(descInside);
 
                 // recipe title
-                Label title = new Label(forRecipe.name);
+                Label title = new Label(recipe.name);
                 title.setAlignment(Pos.CENTER_LEFT);
                 BorderPane.setAlignment(title, Pos.CENTER_LEFT);
                 descInside.setLeft(title);
 
                 // recipe type
-                Label recipeType = new Label(forRecipe.kind.name());
+                Label recipeType = new Label(recipe.kind.name());
                 recipeType.setAlignment(Pos.CENTER_RIGHT);
                 BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
                 descInside.setRight(recipeType);
@@ -347,7 +349,12 @@ public class App extends Application {
 
             {
                 StackPane delPane = new StackPane();
-                delPane.getChildren().add(new Button("Delete"));
+                Button deleteButton = new Button("Delete");
+                delPane.getChildren().add(deleteButton);
+                deleteButton.setOnMouseClicked(e -> {
+                    recipes.remove(recipe);
+                    recipesUI.getChildren().remove(recipePane);
+                });
                 delPane.setPadding(new Insets(20.0));
                 recipeHbox.getChildren().add(delPane);
             }
@@ -392,8 +399,8 @@ public class App extends Application {
             toAdd.kind = RecipeKind.values()[i % 3];
             toAdd.name = "Recipe #" + i;
             // for deleting recipes you probably want to store each recipe's UI object in the Recipe object and call delete through there
-            recipes.add(toAdd);
-            addRecipeUI(toAdd);
+            
+            addRecipe(toAdd);
         }
         // mainBox.getChildren().add(scrollPaneContents);
         ScrollPane pane = new ScrollPane();
