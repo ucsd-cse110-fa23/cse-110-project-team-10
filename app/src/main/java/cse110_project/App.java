@@ -15,6 +15,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -40,12 +41,15 @@ class postRecipeCreate extends VBox {
     // pmt = passed meal type, pml = passed meal ingredient list
     public postRecipeCreate(String pmt, String pml) {
         recipeGenerate rg = new recipeGenerate(pmt, pml);
+        
         String ro = "";
+
         try {
             ro = rg.generate();
         } catch (IOException | InterruptedException | URISyntaxException e) {
             e.printStackTrace();
         }
+
         rName = ro.substring(ro.indexOf(':')+2, ro.indexOf("Ingredients"));
         rDesc = ro.substring(ro.indexOf("Ingredients"));
 
@@ -91,8 +95,12 @@ class postRecipeCreate extends VBox {
         VBox recipeDetail = new VBox();
         recipeDetail.getChildren().addAll(recipeDescription);
         recipeDetail.setPadding(new Insets(10, 10, 10, 10));
+        
+        ScrollPane sp = new ScrollPane(recipeDetail);
+        sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 
-        this.getChildren().addAll(buttonArea, recipeDetail);
+        this.getChildren().addAll(buttonArea, sp);
 
         scene = new Scene(this, 550, 550);
 
