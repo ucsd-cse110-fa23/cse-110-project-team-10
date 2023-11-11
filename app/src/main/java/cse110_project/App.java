@@ -29,6 +29,7 @@ class postRecipeCreate extends VBox {
 
     public String rName; 
     public String rDesc;
+    public RecipeKind rKind;
 
     private Button saveRecipeButton; 
     private Button editRecipeButton;
@@ -48,8 +49,9 @@ class postRecipeCreate extends VBox {
         } catch (IOException | InterruptedException | URISyntaxException e) {
             e.printStackTrace();
         }
-        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf("Ingredients"));
+        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
         rDesc = ro.substring(ro.indexOf("Ingredients"));
+        rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
 
         postCreateStage = new Stage();
         recipeDescription = new TextArea();
@@ -76,9 +78,8 @@ class postRecipeCreate extends VBox {
     public void postRecipeCreateDisplay() {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
-            Recipe newRecipe = new Recipe();
-            newRecipe.name = rName;
-            newRecipe.description = rDesc;
+            Recipe newRecipe = new Recipe(rName, rDesc, rKind);
+            System.out.println(newRecipe.getRecipeKind().name());
             postCreateStage.close();
             
         });
@@ -93,7 +94,7 @@ class postRecipeCreate extends VBox {
             }
         });
         backButton.setOnAction(e -> {
-            //todo
+            postCreateStage.close();
         });
 
         HBox buttonArea = new HBox();
@@ -316,7 +317,7 @@ class DetailedViewScreen extends VBox {
         postCreateStage = new Stage();
         recipeDescription = new TextArea();
         recipeDescription.setWrapText(true);
-        recipeDescription.appendText(tempR.description);
+        recipeDescription.appendText(tempR.getRecipeDescription());
         saveflag = false;
         recipeDescription.setEditable(saveflag);
 
@@ -338,7 +339,7 @@ class DetailedViewScreen extends VBox {
     public void ShowDetailedView() {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
-            tempR.description = updatedDesc;
+            tempR.setRecipeDescription(updatedDesc);
             postCreateStage.close();
         });
         editRecipeButton.setOnAction(e -> {
@@ -352,7 +353,7 @@ class DetailedViewScreen extends VBox {
             }
         });
         backButton.setOnAction(e -> {
-            //todo
+            postCreateStage.close();
         });
 
         HBox buttonArea = new HBox();
@@ -374,19 +375,6 @@ class DetailedViewScreen extends VBox {
         postCreateStage.show();
     }
 }
-// the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
-enum RecipeKind {
-    Breakfast,
-    Lunch,
-    Dinner
-}
-
-class Recipe {
-    public RecipeKind kind;
-    public String name = "";
-    public String description = "";
-    
-}
 
 // JavaFX Application main entry point
 public class App extends Application {
@@ -400,6 +388,10 @@ public class App extends Application {
 
     private ArrayList<Recipe> recipes;
     private VBox recipesUI;
+
+    private String rName;
+    private String rDesc;
+    private RecipeKind rKind;
 
     private void addRecipe(Recipe recipe) {
             recipes.add(recipe);
@@ -424,18 +416,18 @@ public class App extends Application {
                 descPane.getChildren().add(descInside);
 
                 // recipe title
-                Button title = new Button(recipe.name);
+                Button title = new Button(recipe.getRecipeName());
                 title.setAlignment(Pos.CENTER_LEFT);
                 BorderPane.setAlignment(title, Pos.CENTER_LEFT);
                 descInside.setLeft(title);
                 title.setOnMouseClicked(e -> {
                     ds = new DetailedViewScreen(recipe);
                     ds.ShowDetailedView();
-                    System.out.println(recipe.description);
+                    System.out.println(recipe.getRecipeDescription());
                 });
 
                 // recipe type
-                Label recipeType = new Label(recipe.kind.name());
+                Label recipeType = new Label(recipe.getRecipeKind().name());
                 recipeType.setAlignment(Pos.CENTER_RIGHT);
                 BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
                 descInside.setRight(recipeType);
@@ -491,9 +483,10 @@ public class App extends Application {
         recipes = new ArrayList<Recipe>();
         recipesUI.setAlignment(Pos.TOP_CENTER);
         for (int i = 0; i < 100; i++) {
-            Recipe toAdd = new Recipe();
-            toAdd.kind = RecipeKind.values()[i % 3];
-            toAdd.name = "Recipe #" + i;
+            rName = "Recipe #" + i;
+            rDesc = "";
+            rKind = RecipeKind.valueOf("Dinner");
+            Recipe toAdd = new Recipe(rName, rDesc, rKind);
             // for deleting recipes you probably want to store each recipe's UI object in the Recipe object and call delete through there
             
             addRecipe(toAdd);
