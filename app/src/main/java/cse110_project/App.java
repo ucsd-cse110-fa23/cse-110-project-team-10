@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javafx.application.Application;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -32,9 +33,10 @@ class postRecipeCreate extends VBox {
     private Button saveRecipeButton; 
     private Button editRecipeButton;
     private Button backButton; 
-    private Label recipeDescription;
+    private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
+    private boolean editflag;
 
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
@@ -50,10 +52,11 @@ class postRecipeCreate extends VBox {
         rDesc = ro.substring(ro.indexOf("Ingredients"));
 
         postCreateStage = new Stage();
-        
-        recipeDescription = new Label(ro);
-        recipeDescription.setAlignment(Pos.CENTER);
+        recipeDescription = new TextArea();
         recipeDescription.setWrapText(true);
+        recipeDescription.appendText(rDesc);
+        editflag = false;
+        recipeDescription.setEditable(editflag);
 
         saveRecipeButton = new Button("save");
         saveRecipeButton.setPrefSize(45, 15);
@@ -72,12 +75,22 @@ class postRecipeCreate extends VBox {
 
     public void postRecipeCreateDisplay() {
         saveRecipeButton.setOnAction(e -> {
-            //todo
-            System.out.println(rName);
-            System.out.println(rDesc);
+            String updatedDesc = recipeDescription.getText();
+            Recipe newRecipe = new Recipe();
+            newRecipe.name = rName;
+            newRecipe.description = rDesc;
+            postCreateStage.close();
+            
         });
         editRecipeButton.setOnAction(e -> {
-            //todo
+            if(editflag == false){
+                editflag = true;
+                recipeDescription.setEditable(editflag);
+            }
+            else{
+                editflag = false;
+                recipeDescription.setEditable(editflag);
+            }
         });
         backButton.setOnAction(e -> {
             //todo
@@ -284,6 +297,83 @@ class newScreen extends VBox {
     }
 }
 
+class DetailedViewScreen extends VBox {
+
+    private Button saveRecipeButton; 
+    private Button editRecipeButton;
+    private Button backButton; 
+    private TextArea recipeDescription;
+    private Stage postCreateStage;
+    private Scene scene;
+    private boolean saveflag;
+    private Recipe tempR;
+
+    // display the generated recipe description in a new popout window
+    // pmt = passed meal type, pml = passed meal ingredient list
+    DetailedViewScreen(Recipe r) {
+
+        tempR = r;
+        postCreateStage = new Stage();
+        recipeDescription = new TextArea();
+        recipeDescription.setWrapText(true);
+        recipeDescription.appendText(tempR.description);
+        saveflag = false;
+        recipeDescription.setEditable(saveflag);
+
+        saveRecipeButton = new Button("save");
+        saveRecipeButton.setPrefSize(45, 15);
+        saveRecipeButton.setAlignment(Pos.CENTER);
+
+        editRecipeButton = new Button("edit");
+        editRecipeButton.setPrefSize(45, 15);
+        editRecipeButton.setAlignment(Pos.CENTER);
+
+        backButton = new Button("back");
+        backButton.setPrefSize(45, 15);
+        backButton.setAlignment(Pos.CENTER);
+
+        this.setPrefSize(500, 500);
+    }
+
+    public void ShowDetailedView() {
+        saveRecipeButton.setOnAction(e -> {
+            String updatedDesc = recipeDescription.getText();
+            tempR.description = updatedDesc;
+            postCreateStage.close();
+        });
+        editRecipeButton.setOnAction(e -> {
+            if(saveflag == false){
+                saveflag = true;
+                recipeDescription.setEditable(saveflag);
+            }
+            else{
+                saveflag = false;
+                recipeDescription.setEditable(saveflag);
+            }
+        });
+        backButton.setOnAction(e -> {
+            //todo
+        });
+
+        HBox buttonArea = new HBox();
+        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.setPadding(new Insets(10, 10, 10, 10));
+        buttonArea.setSpacing(199);
+
+        VBox recipeDetail = new VBox();
+        recipeDetail.getChildren().addAll(recipeDescription);
+        recipeDetail.setPadding(new Insets(10, 10, 10, 10));
+
+        this.getChildren().addAll(buttonArea, recipeDetail);
+
+        scene = new Scene(this, 550, 550);
+
+        postCreateStage.setTitle("Generated Recipe");
+        postCreateStage.setResizable(false);
+        postCreateStage.setScene(scene);
+        postCreateStage.show();
+    }
+}
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
 enum RecipeKind {
     Breakfast,
@@ -302,6 +392,7 @@ class Recipe {
 public class App extends Application {
 
     private newScreen ns;
+    private DetailedViewScreen ds;
 
   public static void main(String[] args) {
         launch(args);
@@ -333,10 +424,15 @@ public class App extends Application {
                 descPane.getChildren().add(descInside);
 
                 // recipe title
-                Label title = new Label(recipe.name);
+                Button title = new Button(recipe.name);
                 title.setAlignment(Pos.CENTER_LEFT);
                 BorderPane.setAlignment(title, Pos.CENTER_LEFT);
                 descInside.setLeft(title);
+                title.setOnMouseClicked(e -> {
+                    ds = new DetailedViewScreen(recipe);
+                    ds.ShowDetailedView();
+                    System.out.println(recipe.description);
+                });
 
                 // recipe type
                 Label recipeType = new Label(recipe.kind.name());
