@@ -79,7 +79,8 @@ class postRecipeCreate extends VBox {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, rDesc, rKind);
-            System.out.println(newRecipe.getRecipeKind().name());
+            // ???
+            //App.addRecipe(newRecipe);
             postCreateStage.close();
             
         });
@@ -387,13 +388,13 @@ public class App extends Application {
     }
 
     private ArrayList<Recipe> recipes;
-    private VBox recipesUI;
+    public VBox recipesUI;
 
     private String rName;
     private String rDesc;
     private RecipeKind rKind;
 
-    private void addRecipe(Recipe recipe) {
+    public void addRecipe(Recipe recipe) {
             recipes.add(recipe);
             StackPane recipePane = new StackPane();
             
@@ -450,7 +451,6 @@ public class App extends Application {
             recipePane.setPadding(new Insets(20.0));
 
             recipesUI.getChildren().add(recipePane);
-
     }
 
     @Override
@@ -481,6 +481,8 @@ public class App extends Application {
 
         recipesUI = new VBox();
         recipes = new ArrayList<Recipe>();
+        csvOperations c = new csvOperations(recipes);
+        recipes = c.readFromJSON();
         recipesUI.setAlignment(Pos.TOP_CENTER);
         for (int i = 0; i < 100; i++) {
             rName = "Recipe #" + i;
