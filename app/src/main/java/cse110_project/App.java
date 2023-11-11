@@ -50,8 +50,9 @@ class postRecipeCreate extends VBox {
             e.printStackTrace();
         }
 
-        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf("Ingredients"));
+        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
         rDesc = ro.substring(ro.indexOf("Ingredients"));
+        System.out.println(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
 
         postCreateStage = new Stage();
         
@@ -291,7 +292,7 @@ class newScreen extends VBox {
         return result;
     }
 }
-
+ 
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
 enum RecipeKind {
     Breakfast,

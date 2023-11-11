@@ -14,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RecipeGenerateTest {
+public class NewRecipeTest {
+    mockWhisper wapi;
     private mockRecipeGenerate rgt;
     private String mType;
     private String mIngr;
@@ -24,21 +25,23 @@ public class RecipeGenerateTest {
     void setUp() {
         mType = "lunch";
         mIngr = "cheese,onions,turkey,bread,mustard";
-        rgt = new mockRecipeGenerate(mType, mIngr);
+        wapi = new mockWhisper();
+        String voicemType = wapi.mockHandleVoiceInput(mType);
+        String voicemIngr = wapi.mockHandleVoiceInput(mIngr);
+        rgt = new mockRecipeGenerate(voicemType, voicemIngr);
         rgtout = rgt.generate();
         rgtout = rgtout.toLowerCase();
     }
 
-    // Test that generated meal is of the specified meal type
+    // Test recipe creation from voice input 
     @Test
-    void testMealType() {
-        assertTrue(rgtout.contains(mType));
-    }
-
-    // Test that generated recipe contains specified ingredients
-    // check that the generated recipe uses at least 80% of the ingredients we specified
-    @Test
-    void testMealDetail() {
+    void testNewRecipeCreation() {
+        boolean correctMealType = false;
+        boolean correctMealDescription = false;
+        if (rgtout.contains(mType)) {
+            correctMealType = true;
+        }
+        
         String[] foodList = mIngr.split(",");
         int icount = 0;
         for(int i = 0; i<foodList.length; i++) {
@@ -49,7 +52,12 @@ public class RecipeGenerateTest {
         }
         float percentiused = (float)(icount)/(float)(foodList.length);
         float acceptable = (float) 0.8;
-        
-        assertTrue(percentiused >= acceptable);
-    }
+
+        if (percentiused >= acceptable) {
+            correctMealDescription = true;
+        }
+
+        assertTrue(correctMealType && correctMealDescription);
+    } 
 }
+
