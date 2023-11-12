@@ -195,8 +195,8 @@ class newScreen extends VBox {
 
     private postRecipeCreate prc;
 
-    private String mealType;
-    private String mealList;
+    private String mealType = "";
+    private String mealList = "";
 
     String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";
 
@@ -213,6 +213,7 @@ class newScreen extends VBox {
         this.setPrefSize(500, 800);
 
         doneButton = new Button("Done");
+        doneButton.setVisible(false);
 
         mealPrompt = new Prompt();
         ingredientPrompt = new Prompt();
@@ -236,6 +237,9 @@ class newScreen extends VBox {
                     mealPrompt.setLabel(RESPONSE + mealType);
                     // Prompt user to input ingredient list after finish recording meal type
                     ingredientPrompt.setLabel(INGREDIENT_PROMPT);
+                    if (mealType != "" && mealList != "") {
+                        doneButton.setVisible(true);
+                    }
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
@@ -252,6 +256,9 @@ class newScreen extends VBox {
                     aRecord.stopRecording();
                     mealList = getVoiceInput();
                     ingredientPrompt.setLabel(RESPONSE + mealList);
+                    if (mealType != "" && mealList != "") {
+                        doneButton.setVisible(true);
+                    }
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
