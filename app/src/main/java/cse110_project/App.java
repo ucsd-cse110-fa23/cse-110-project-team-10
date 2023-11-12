@@ -454,8 +454,6 @@ public class App extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("Recipe Run");
 
-        ns = new newScreen();
-
         VBox mainBox = new VBox();
         mainBox.setAlignment(Pos.TOP_CENTER);
 
@@ -467,6 +465,7 @@ public class App extends Application {
             newRecipe.setMinHeight(50.0);
 
             newRecipe.setOnMouseClicked(e -> {
+                ns = new newScreen();
                 ns.voiceInputScreen();
             });
 
@@ -484,25 +483,6 @@ public class App extends Application {
         for(Recipe r : tempRecipeList){
             addRecipe(r);
         }
-        /* 
-        for (int i = 0; i < 5; i++) {
-            rName = "Recipe #" + i;
-            rDesc = "";
-            rKind = RecipeKind.valueOf("dinner");
-            Recipe toAdd = new Recipe(rName, rDesc, rKind);
-            // for deleting recipes you probably want to store each recipe's UI object in the Recipe object and call delete through there
-            
-            addRecipe(toAdd);
-        }
-        */
-        JSONOperations c2 = new JSONOperations(state);
-        c2.writeToJSON();
-        String testName = "beef soup";
-        String testDesc = "beef, carrot, lettuce, water, salt";
-        RecipeKind testKind = RecipeKind.valueOf("dinner");
-        Recipe testRecipe = new Recipe(testName, testDesc, testKind);
-        addRecipe(testRecipe);
-        c2.writeToJSON();
         // mainBox.getChildren().add(scrollPaneContents);
         ScrollPane pane = new ScrollPane();
         pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {

@@ -10,7 +10,7 @@ public class RecipeStateManager {
     }
 
     public void addRecipe(Recipe r){
-        recipes.add(r);
+        recipes.add(0, r);
     }  
 
     public void deleteRecipe(Recipe r){
