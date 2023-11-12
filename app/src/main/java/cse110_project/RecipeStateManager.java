@@ -9,6 +9,11 @@ public class RecipeStateManager {
         recipes = new ArrayList<Recipe>();
     }
 
+    RecipeStateManager(ArrayList<Recipe> recipes){
+        this.recipes = recipes;
+    }
+
+
     public void addRecipe(Recipe r){
         recipes.add(0, r);
     }  

@@ -12,10 +12,10 @@ public class Recipe {
     private String name = "";
     private String description = "";
 
-    Recipe(String n, String i, RecipeKind rk) {
-        name = n;
-        description = i;
-        kind = rk;
+    Recipe(String name, String description, RecipeKind kind) {
+        this.name = name;
+        this.description = description;
+        this.kind = kind;
     }
 
     public String getRecipeName(){
