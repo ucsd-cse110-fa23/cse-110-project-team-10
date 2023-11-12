@@ -482,9 +482,13 @@ public class App extends Application {
         recipesUI = new VBox();
         recipes = new ArrayList<Recipe>();
         csvOperations c = new csvOperations(recipes);
-        recipes = c.readFromJSON();
+        ArrayList<Recipe> tempRecipeList = c.readFromJSON(); //returns arraylist of recipes
         recipesUI.setAlignment(Pos.TOP_CENTER);
-        for (int i = 0; i < 100; i++) {
+        for(Recipe r : tempRecipeList){
+            addRecipe(r);
+        }
+        /*
+        for (int i = 0; i < 5; i++) {
             rName = "Recipe #" + i;
             rDesc = "";
             rKind = RecipeKind.valueOf("Dinner");
@@ -493,6 +497,14 @@ public class App extends Application {
             
             addRecipe(toAdd);
         }
+        */
+        //csvOperations c2 = new csvOperations(recipes);
+        //c2.writeToJSON();
+        //String testName = "beef soup";
+        //String testDesc = "beef, carrot, lettuce, water, salt";
+        //Recipe testRecipe = new Recipe(testName, testDesc, rKind);
+        //addRecipe(testRecipe);
+        //c2.writeToJSON();
         // mainBox.getChildren().add(scrollPaneContents);
         ScrollPane pane = new ScrollPane();
         pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
