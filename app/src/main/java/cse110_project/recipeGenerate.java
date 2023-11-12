@@ -26,7 +26,7 @@ public class recipeGenerate {
 
     public String generate() throws IOException, InterruptedException, URISyntaxException{
         // Set request parameters
-        String prompt = "Make me a "+recipe_type+" meal with the following ingredients: "+recipe_list+". Start response with the format:'recipe name:___' and response can be no longer than 500 words. Include the meal type breakfast/lunch/dinner in the format in parentheses immediately after meal name";
+        String prompt = "Make me a "+recipe_type+" meal with the following ingredients: "+recipe_list+". Start response with the format:'recipe name:___'. Include the meal type breakfast/lunch/dinner in the format in parentheses immediately after meal name";
         int maxTokens = 550;
         // Create a request body which you will pass into request object
         JSONObject requestBody = new JSONObject();

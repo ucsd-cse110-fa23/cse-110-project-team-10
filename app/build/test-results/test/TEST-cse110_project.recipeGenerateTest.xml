@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="cse110_project.recipeGenerateTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2023-11-07T07:22:38" hostname="Ethans-Air.lan" time="16.698">
-  <properties/>
-  <testcase name="testNewRecipeButton()" classname="cse110_project.recipeGenerateTest" time="6.02"/>
-  <testcase name="testMealType()" classname="cse110_project.recipeGenerateTest" time="6.667"/>
-  <testcase name="testMealDetail()" classname="cse110_project.recipeGenerateTest" time="4.01"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

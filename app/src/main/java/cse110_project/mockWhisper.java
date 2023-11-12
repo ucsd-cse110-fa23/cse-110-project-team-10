@@ -9,5 +9,10 @@ public class mockWhisper implements WhisperAPI {
         String Mockresult = "user response";
         return Mockresult;
     }
+
+    public String mockHandleVoiceInput(String voiceInputString) {
+        String Mockresult = voiceInputString;
+        return Mockresult;
+    }
     
 }

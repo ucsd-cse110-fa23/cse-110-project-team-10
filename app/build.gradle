@@ -33,10 +33,11 @@ application {
 
 run {
     // Add VM options for JavaFX.
-    jvmArgs = ['--module-path', '/Users/ethanxu/Desktop/javafx-sdk-21/lib', '--add-modules', 'javafx.controls,javafx.fxml']
+    jvmArgs = ['--module-path', project.property('javafx_path'), '--add-modules', 'javafx.controls,javafx.fxml']
 }
 
 tasks.named('test') {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
+

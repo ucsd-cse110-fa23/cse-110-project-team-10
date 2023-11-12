@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="cse110_project.VoiceTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2023-11-07T07:22:38" hostname="Ethans-Air.lan" time="0.009">
-  <properties/>
-  <testcase name="displayTest()" classname="cse110_project.VoiceTest" time="0.009"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

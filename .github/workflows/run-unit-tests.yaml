@@ -31,7 +31,7 @@ jobs:
 
       # build everything (includes running unit tests)
       - name: Execute Gradle build
-        run: ./gradlew build
+        run: ./gradlew build -Pjavafx_path="."
 
       # report the results
       - name: Publish Test Report
