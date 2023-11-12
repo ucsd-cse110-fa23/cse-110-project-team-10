@@ -1,6 +1,8 @@
 # Has hardcoded path
 .vscode/launch.json
 
+gradle.properties
+
 app/recording.wav
 
 # This is a build file?

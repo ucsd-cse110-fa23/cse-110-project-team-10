@@ -12,7 +12,7 @@ public class AudioRecord {
     private Label recordingLabel;
     String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";
 
-    AudioRecord(Label rLabel){
+    AudioRecord(Label rLabel) {
         audioFormat = getAudioFormat();
 
         recordingLabel = rLabel;
@@ -46,37 +46,69 @@ public class AudioRecord {
 
     public void startRecording() {
         Thread t = new Thread(
-        new Runnable() {
-          @Override
-          public void run() {
-            try {
-                // the format of the TargetDataLine
-                DataLine.Info dataLineInfo = new DataLine.Info(
-                        TargetDataLine.class,
-                        audioFormat);
-                // the TargetDataLine used to capture audio data from the microphone
-                targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
-                targetDataLine.open(audioFormat);
-                targetDataLine.start();
-                recordingLabel.setVisible(true);
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Mixer.Info[] mixerInfos = AudioSystem.getMixerInfo();
 
-                // the AudioInputStream that will be used to write the audio data to a file
-                AudioInputStream audioInputStream = new AudioInputStream(
-                        targetDataLine);
+                            int preference = -1;
+                            System.out.println("Available recording mixers:");
+                            for (int i = 0; i < mixerInfos.length; i++) {
+                                Mixer mixer = AudioSystem.getMixer(mixerInfos[i]);
+                                Line.Info[] lineInfos = mixer.getTargetLineInfo();
+                                for (Line.Info lineInfo : lineInfos) {
+                                    if (lineInfo.getLineClass().equals(TargetDataLine.class)) {
+                                        if (mixerInfos[i].getName().contains("Microphone Array")) {
+                                            preference = i;
+                                            System.out.println("Preferring " + mixerInfos[i].getName());
+                                        }
+                                        System.out.println(i + ": " + mixerInfos[i].getName());
+                                        break;
+                                    }
+                                }
+                            }
 
-                // the file that will contain the audio data
-                File audioFile = new File("recording.wav");
-                AudioSystem.write(
-                        audioInputStream,
-                        AudioFileFormat.Type.WAVE,
-                        audioFile);
-                recordingLabel.setVisible(false);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-          }
-        });
-    t.start();
+                            boolean wentWithPreference = false;
+                            if (preference >= 0) {
+                                Mixer mixer = AudioSystem.getMixer(mixerInfos[preference]);
+                                Line.Info[] lineInfos = mixer.getTargetLineInfo();
+                                if (lineInfos.length >= 1 && lineInfos[0].getLineClass().equals(TargetDataLine.class)) {
+                                    targetDataLine = (TargetDataLine) mixer.getLine(lineInfos[0]);
+                                    System.out.println("Went with preference");
+                                    wentWithPreference = true;
+                                }
+                            }
+                            if (!wentWithPreference) {
+                                // the format of the TargetDataLine
+                                DataLine.Info dataLineInfo = new DataLine.Info(
+                                        TargetDataLine.class,
+                                        audioFormat);
+                                // the TargetDataLine used to capture audio data from the microphone
+                                targetDataLine = (TargetDataLine) AudioSystem.getLine(dataLineInfo);
+                            }
+
+                            targetDataLine.open(audioFormat);
+                            targetDataLine.start();
+                            recordingLabel.setVisible(true);
+
+                            // the AudioInputStream that will be used to write the audio data to a file
+                            AudioInputStream audioInputStream = new AudioInputStream(
+                                    targetDataLine);
+
+                            // the file that will contain the audio data
+                            File audioFile = new File("recording.wav");
+                            AudioSystem.write(
+                                    audioInputStream,
+                                    AudioFileFormat.Type.WAVE,
+                                    audioFile);
+                            recordingLabel.setVisible(false);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+        t.start();
 
     }
 
