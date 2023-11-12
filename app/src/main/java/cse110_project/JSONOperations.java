@@ -35,7 +35,7 @@ public class JSONOperations {
         RecipeStateManager ret = new RecipeStateManager();
         JSONObject rootObject = new JSONObject(jsonString);
         JSONArray arr = rootObject.getJSONArray("recipes");
-        for (int i = 0; i < arr.length(); i++) {
+        for (int i = arr.length() - 1; i >= 0; i--) { // iterates backwards because addRecipe adds in reverse order
             JSONObject recipeJSON = arr.getJSONObject(i);
             Recipe recipe = fromJSON(recipeJSON);
             ret.addRecipe(recipe);

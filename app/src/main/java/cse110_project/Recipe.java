@@ -8,7 +8,7 @@ enum RecipeKind {
 }
 
 public class Recipe {
-    private RecipeKind kind;
+    private RecipeKind kind = RecipeKind.breakfast;
     private String name = "";
     private String description = "";
 
@@ -17,6 +17,7 @@ public class Recipe {
         this.description = description;
         this.kind = kind;
     }
+    Recipe() {}
 
     public String getRecipeName(){
         return name;

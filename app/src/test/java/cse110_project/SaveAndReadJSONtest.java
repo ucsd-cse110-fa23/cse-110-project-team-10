@@ -21,24 +21,24 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SaveAndReadJSONtest {
-    ArrayList<Recipe> testList = new ArrayList<>();
+    RecipeStateManager testState = new RecipeStateManager();
     String rName;
     String rDesc;
     RecipeKind rKind;
 
     @BeforeEach
-    public void setup(){
+    public void setup() {
         for (int i = 0; i < 5; i++) {
             rName = "Recipe #" + i;
             rDesc = "";
             rKind = RecipeKind.valueOf("dinner");
             Recipe toAdd = new Recipe(rName, rDesc, rKind);
-            testList.add(toAdd);
+            testState.addRecipe(toAdd);
         }
 
         JSONObject cr;
         try (FileWriter fw = new FileWriter("recipestest.json")) {
-            for (Recipe r : testList) {
+            for (Recipe r : testState.getRecipes()) {
                 cr = new JSONObject();
                 cr.put("name", r.getRecipeName());
                 cr.put("description", r.getRecipeDescription());
@@ -50,34 +50,28 @@ public class SaveAndReadJSONtest {
         }
 
     }
+
     @Test
-    public void testSaveToJSON(){
-        JSONOperations c = new JSONOperations(testList);
-        c.writeToJSON(); //should write to a file called recipes.json
-        String jsonString = "A";
-        String keyString = "B";
-        try{
-            jsonString = new String(Files.readAllBytes(Paths.get("recipes.json")));
+    public void testSaveToJSON() {
+        String asJSON = JSONOperations.intoJSONString(testState);
+        RecipeStateManager parsedFromJSON = JSONOperations.fromJSONString(asJSON);
+
+        for(int i = 0; i < testState.getRecipes().size(); i++) {
+            Recipe rFrom = testState.getRecipes().get(i);
+            Recipe rParsed = parsedFromJSON.getRecipes().get(i);
+            assertEquals(rFrom.getRecipeKind(), rParsed.getRecipeKind());
+            assertEquals(rFrom.getRecipeName(), rParsed.getRecipeName());
+            assertEquals(rFrom.getRecipeDescription(), rParsed.getRecipeDescription());
         }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        try{
-            keyString = new String(Files.readAllBytes(Paths.get("recipestest.json")));
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        assertEquals(jsonString, keyString);
     }
 
     @Test
-    public void testReadFromJSON(){
+    public void testReadFromJSON() {
         JSONObject cr2;
         String returnString = "A";
         String returnString2 = "B";
         try (FileWriter fw = new FileWriter("recipes.json")) {
-            for (Recipe r : testList) {
+            for (Recipe r : testState.getRecipes()) {
                 cr2 = new JSONObject();
                 cr2.put("name", r.getRecipeName());
                 cr2.put("description", r.getRecipeDescription());
@@ -87,16 +81,14 @@ public class SaveAndReadJSONtest {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try{
+        try {
             returnString = new String(Files.readAllBytes(Paths.get("recipes.json")));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        try{
+        try {
             returnString2 = new String(Files.readAllBytes(Paths.get("recipestest.json")));
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         assertEquals(returnString, returnString2);

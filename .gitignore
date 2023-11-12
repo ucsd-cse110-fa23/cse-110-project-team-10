@@ -1,6 +1,7 @@
 # Has hardcoded path
 .vscode/launch.json
 
+recipestest.json
 recipes.json
 gradle.properties
 
