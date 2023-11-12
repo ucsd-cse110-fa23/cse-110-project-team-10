@@ -15,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -54,6 +56,7 @@ class postRecipeCreate extends VBox {
         recipeDescription = new Label(ro);
         recipeDescription.setAlignment(Pos.CENTER);
         recipeDescription.setWrapText(true);
+
 
         saveRecipeButton = new Button("save");
         saveRecipeButton.setPrefSize(45, 15);
@@ -307,11 +310,11 @@ public class App extends Application {
         launch(args);
     }
 
-    private ArrayList<Recipe> recipes;
+    private RecipeStateManager state;
     private VBox recipesUI;
 
     private void addRecipe(Recipe recipe) {
-            recipes.add(recipe);
+            state.addRecipe(recipe);
             StackPane recipePane = new StackPane();
             
             HBox.setHgrow(recipePane, Priority.ALWAYS);
@@ -352,7 +355,7 @@ public class App extends Application {
                 Button deleteButton = new Button("Delete");
                 delPane.getChildren().add(deleteButton);
                 deleteButton.setOnMouseClicked(e -> {
-                    recipes.remove(recipe);
+                    state.deleteRecipe(recipe);
                     recipesUI.getChildren().remove(recipePane);
                 });
                 delPane.setPadding(new Insets(20.0));
@@ -364,6 +367,7 @@ public class App extends Application {
             recipesUI.getChildren().add(recipePane);
 
     }
+
 
     @Override
     public void start(Stage primaryStage) {
@@ -392,7 +396,7 @@ public class App extends Application {
         }
 
         recipesUI = new VBox();
-        recipes = new ArrayList<Recipe>();
+        state = new RecipeStateManager();
         recipesUI.setAlignment(Pos.TOP_CENTER);
         for (int i = 0; i < 100; i++) {
             Recipe toAdd = new Recipe();
