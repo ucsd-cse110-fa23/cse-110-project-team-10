@@ -14,8 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class recipeGenerateTest {
-    private recipeGenerate rgt;
+public class RecipeGenerateTest {
+    private mockRecipeGenerate rgt;
     private String mType;
     private String mIngr;
     private String rgtout;
@@ -24,19 +24,9 @@ public class recipeGenerateTest {
     void setUp() {
         mType = "lunch";
         mIngr = "cheese,onions,turkey,bread,mustard";
-        rgt = new recipeGenerate(mType, mIngr);
-        try {
-            rgtout = rgt.generate();
-            rgtout = rgtout.toLowerCase();
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-    //todo
-    @Test
-    void testNewRecipeButton() {
-        assertTrue(true);
+        rgt = new mockRecipeGenerate(mType, mIngr);
+        rgtout = rgt.generate();
+        rgtout = rgtout.toLowerCase();
     }
 
     // Test that generated meal is of the specified meal type
@@ -46,6 +36,7 @@ public class recipeGenerateTest {
     }
 
     // Test that generated recipe contains specified ingredients
+    // check that the generated recipe uses at least 80% of the ingredients we specified
     @Test
     void testMealDetail() {
         String[] foodList = mIngr.split(",");
@@ -58,13 +49,7 @@ public class recipeGenerateTest {
         }
         float percentiused = (float)(icount)/(float)(foodList.length);
         float acceptable = (float) 0.8;
-        /* 
-        System.out.println("icount: " + (float)(icount));
-        System.out.println("list length: " + (float)(foodList.length));
-        System.out.println(percentiused);
-        System.out.println(Arrays.toString(foodList));
-        System.out.println(rgtout);
-        */
+        
         assertTrue(percentiused >= acceptable);
     }
 }
