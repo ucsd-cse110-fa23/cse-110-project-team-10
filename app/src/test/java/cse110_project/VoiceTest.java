@@ -31,7 +31,7 @@ public class VoiceTest {
     public void audioFileTest() throws Exception{
         File audio = new File("recording.wav");
         boolean audioExist = audio.exists();
-        assertTrue(audioExist);
+        assert(audioExist);
     }
     
     /**
