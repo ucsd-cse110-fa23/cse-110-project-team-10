@@ -15,7 +15,7 @@ public class JSONOperations {
     }
 
     public static Recipe fromJSON(JSONObject obj) {
-        return new Recipe(obj.getString("name"), obj.getString("description"), RecipeKind.valueOf("kind"));
+        return new Recipe(obj.getString("name"), obj.getString("description"), RecipeKind.valueOf(obj.getString("kind")));
     }
 
     public static String intoJSONString(RecipeStateManager manager) {

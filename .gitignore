@@ -1,6 +1,7 @@
 # Has hardcoded path
 .vscode/launch.json
 
+recipes.json
 gradle.properties
 
 app/recording.wav

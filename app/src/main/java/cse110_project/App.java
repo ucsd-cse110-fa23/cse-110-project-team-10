@@ -83,14 +83,16 @@ class postRecipeCreate extends VBox {
         this.setPrefSize(500, 500);
     }
 
-    public void postRecipeCreateDisplay() {
+    public void postRecipeCreateDisplay(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, rDesc, rKind);
-            // ???
-            // App.addRecipe(newRecipe);
-            postCreateStage.close();
 
+            app.addRecipeUI(newRecipe);
+            app.getState().addRecipe(newRecipe);
+            app.writeStateToFile();
+
+            postCreateStage.close();
         });
         editRecipeButton.setOnAction(e -> {
             if (editflag == false) {
@@ -219,7 +221,7 @@ class newScreen extends VBox {
         ingredientMicButton = ingredientPrompt.getMicButton();
     }
 
-    public void voiceInputScreen() {
+    public void voiceInputScreen(App app) {
         mealPrompt.setLabel(MEAL_PROMPT);
 
         // Record and display user's response for meal type
@@ -260,7 +262,7 @@ class newScreen extends VBox {
         doneButton.setOnAction(e -> {
             try {
                 prc = new postRecipeCreate(mealType, mealList);
-                prc.postRecipeCreateDisplay();
+                prc.postRecipeCreateDisplay(app);
                 inputStage.close();
             } catch (Exception exc) {
                 exc.printStackTrace();
@@ -329,10 +331,12 @@ class DetailedViewScreen extends VBox {
         this.setPrefSize(500, 500);
     }
 
-    public void ShowDetailedView() {
+    public void ShowDetailedView(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             tempR.setRecipeDescription(updatedDesc);
+            app.writeStateToFile();
+
             postCreateStage.close();
         });
         editRecipeButton.setOnAction(e -> {
@@ -381,6 +385,11 @@ public class App extends Application {
     }
 
     private RecipeStateManager state;
+
+    RecipeStateManager getState() {
+        return state;
+    }
+
     public VBox recipesUI;
 
     private String rName;
@@ -429,7 +438,7 @@ public class App extends Application {
             descInside.setLeft(title);
             title.setOnMouseClicked(e -> {
                 ds = new DetailedViewScreen(recipe);
-                ds.ShowDetailedView();
+                ds.ShowDetailedView(this);
                 System.out.println(recipe.getRecipeDescription());
             });
 
@@ -476,7 +485,7 @@ public class App extends Application {
 
             newRecipe.setOnMouseClicked(e -> {
                 ns = new newScreen();
-                ns.voiceInputScreen();
+                ns.voiceInputScreen(this);
             });
 
             Region spacer = new Region();
@@ -489,12 +498,12 @@ public class App extends Application {
         state = new RecipeStateManager();
         String savedData = "";
         try {
-            String content = new String(Files.readAllBytes(Paths.get(saveFilePath)));
-            System.out.println(content);
+            savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
         } catch (IOException e) {
             e.printStackTrace();
         }
         if (savedData.length() > 0) {
+            System.out.println("Loading from " + saveFilePath);
             state = JSONOperations.fromJSONString(savedData);
         }
 
