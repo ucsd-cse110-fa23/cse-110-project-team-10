@@ -213,7 +213,7 @@ class newScreen extends VBox {
         this.setPrefSize(500, 800);
 
         doneButton = new Button("Done");
-        doneButton.setVisible(false);
+        doneButton.setDisable(true);
 
         mealPrompt = new Prompt();
         ingredientPrompt = new Prompt();
@@ -238,7 +238,7 @@ class newScreen extends VBox {
                     // Prompt user to input ingredient list after finish recording meal type
                     ingredientPrompt.setLabel(INGREDIENT_PROMPT);
                     if (mealType != "" && mealList != "") {
-                        doneButton.setVisible(true);
+                        doneButton.setDisable(false);
                     }
                 }
             } catch (Exception exc) {
@@ -257,7 +257,7 @@ class newScreen extends VBox {
                     mealList = getVoiceInput();
                     ingredientPrompt.setLabel(RESPONSE + mealList);
                     if (mealType != "" && mealList != "") {
-                        doneButton.setVisible(true);
+                        doneButton.setDisable(false);
                     }
                 }
             } catch (Exception exc) {
