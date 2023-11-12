@@ -1,6 +1,8 @@
 # Has hardcoded path
 .vscode/launch.json
 
+app/recording.wav
+
 # This is a build file?
 bin/App.class
 bin/
