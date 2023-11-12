@@ -112,27 +112,23 @@ class postRecipeCreate extends VBox {
     }
 }
 
-class Footer extends HBox{
+//This class creates prompts for user input
+class Prompt extends HBox {
+    private Label prompt;
     private Button micButton;
-    private Button doneButton;
-    private Button nextButton;
     private boolean isRecord;
 
-    Footer(){
-        this.setPrefSize(500, 60);
-        this.setSpacing(15);
-
-        doneButton = new Button("Done");
-        doneButton.setMinHeight(25.0);
+    Prompt(){
+        prompt = new Label();
+        prompt.setPrefSize(500, 250);
+        prompt.setWrapText(true);
+        prompt.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+        prompt.setAlignment(Pos.CENTER);
 
         micButton = new Button("Record");
-        micButton.setMinHeight(25.0);
-        isRecord = false;
+        micButton.setMinHeight(250);
 
-        nextButton = new Button("Next");
-        nextButton.setMinHeight(25.0);
-
-        this.getChildren().addAll(micButton, nextButton, doneButton);
+        this.getChildren().addAll(prompt, micButton);
         this.setAlignment(Pos.CENTER);
     }
 
@@ -149,12 +145,8 @@ class Footer extends HBox{
         return this.micButton;
     }
 
-    public Button getDoneButton() {
-        return this.doneButton;
-    }
-
-    public Button getNextButton() {
-        return this.nextButton;
+    public void setLabel(String text){
+        prompt.setText(text);
     }
 
     public boolean getRecordStatus(){
@@ -168,15 +160,14 @@ class newScreen extends VBox {
     private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
 
-    private Footer footer;
-    private Button micButton;
-    private Button doneButton;
-    private Button nextButton;
+    private Prompt mealPrompt;
+    private Prompt ingredientPrompt;
 
-    private Label response;
+    private Button mealTypeMicButton;
+    private Button ingredientMicButton;
+    private Button doneButton;
 
     private Label recordingLabel;
-    private Label infoLabel;
 
     private AudioRecord aRecord;
 
@@ -184,21 +175,15 @@ class newScreen extends VBox {
 
     private Scene scene;
 
-    private String information;
-
     private postRecipeCreate prc;
 
     private String mealType ; 
     private String mealList ; 
 
-    private boolean recordingIntoList = false; 
-
     String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";  
 
     newScreen() {
         inputStage = new Stage();
-
-        information = "Meal type: ";
 
         recordingLabel = new Label("Recording...");
         recordingLabel.setAlignment(Pos.BOTTOM_CENTER);
@@ -209,55 +194,53 @@ class newScreen extends VBox {
         this.setAlignment(Pos.TOP_CENTER);
         this.setPrefSize(500, 800);
 
-        footer = new Footer();
-        micButton = footer.getMicButton();
-        nextButton = footer.getNextButton();
-        doneButton = footer.getDoneButton();
+        doneButton = new Button("Done");
 
-        response = new Label();
-        response.setPrefSize(500, 500);
-        response.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-        response.setAlignment(Pos.CENTER); 
+        mealPrompt = new Prompt();
+        ingredientPrompt = new Prompt();
 
-        infoLabel = new Label();
-        infoLabel.setPrefSize(500,500);
-        infoLabel.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-        infoLabel.setAlignment(Pos.CENTER); 
+        mealTypeMicButton = mealPrompt.getMicButton();
+        ingredientMicButton = ingredientPrompt.getMicButton();
     }
 
     public void voiceInputScreen() {
-        response.setText(MEAL_PROMPT);
+        mealPrompt.setLabel(MEAL_PROMPT);
 
-        //Record user's response
-        micButton.setOnAction(e -> {
+        //Record and display user's response for meal type
+        mealTypeMicButton.setOnAction(e -> {
             try {
-                footer.toggleRecord();
-                if(footer.getRecordStatus())
+                mealPrompt.toggleRecord();
+                if(mealPrompt.getRecordStatus())
                     aRecord.startRecording();
                 else{
                     aRecord.stopRecording();
-                    if (recordingIntoList) {
-                        mealList = getVoiceInput();
-                        infoLabel.setText(RESPONSE + mealList);
-                    } else {
-                        mealType = getVoiceInput();
-                        response.setText(RESPONSE + mealType);
-                    }
+                    mealType = getVoiceInput();
+                    mealPrompt.setLabel(RESPONSE + mealType);
+                    //Prompt user to input ingredient list after finish recording meal type
+                    ingredientPrompt.setLabel(INGREDIENT_PROMPT);
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
         });
 
-        nextButton.setOnAction(e -> {
-            recordingIntoList = !recordingIntoList;
-            if (recordingIntoList) {
-                infoLabel.setText(INGREDIENT_PROMPT);
-            } else {
-                response.setText(MEAL_PROMPT);
+        //Record and display user's response for ingredient list
+        ingredientMicButton.setOnAction(e -> {
+            try {
+                ingredientPrompt.toggleRecord();
+                if(ingredientPrompt.getRecordStatus())
+                    aRecord.startRecording();
+                else{
+                    aRecord.stopRecording();
+                    mealList = getVoiceInput();
+                    ingredientPrompt.setLabel(RESPONSE + mealList);
+                }
+            } catch (Exception exc) {
+                exc.printStackTrace();
             }
         });
 
+        //Generate and display recipe page
         doneButton.setOnAction(e -> {
             try {
                 prc = new postRecipeCreate(mealType, mealList);
@@ -268,7 +251,7 @@ class newScreen extends VBox {
             }
         });
 
-        this.getChildren().addAll(response, footer, recordingLabel, infoLabel);
+        this.getChildren().addAll(mealPrompt, ingredientPrompt, doneButton, recordingLabel);
         this.setSpacing(15);
 
 
