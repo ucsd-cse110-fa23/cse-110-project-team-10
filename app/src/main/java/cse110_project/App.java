@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javafx.application.Application;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -29,13 +30,15 @@ class postRecipeCreate extends VBox {
 
     public String rName; 
     public String rDesc;
+    public RecipeKind rKind;
 
     private Button saveRecipeButton; 
     private Button editRecipeButton;
     private Button backButton; 
-    private Label recipeDescription;
+    private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
+    private boolean editflag;
 
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
@@ -49,16 +52,16 @@ class postRecipeCreate extends VBox {
         } catch (IOException | InterruptedException | URISyntaxException e) {
             e.printStackTrace();
         }
-
         rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
         rDesc = ro.substring(ro.indexOf("Ingredients"));
-        System.out.println(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
+        rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
 
         postCreateStage = new Stage();
-        
-        recipeDescription = new Label(ro);
-        recipeDescription.setAlignment(Pos.CENTER);
+        recipeDescription = new TextArea();
         recipeDescription.setWrapText(true);
+        recipeDescription.appendText(rDesc);
+        editflag = false;
+        recipeDescription.setEditable(editflag);
 
         saveRecipeButton = new Button("save");
         saveRecipeButton.setPrefSize(45, 15);
@@ -77,15 +80,25 @@ class postRecipeCreate extends VBox {
 
     public void postRecipeCreateDisplay() {
         saveRecipeButton.setOnAction(e -> {
-            //todo
-            System.out.println(rName);
-            System.out.println(rDesc);
+            String updatedDesc = recipeDescription.getText();
+            Recipe newRecipe = new Recipe(rName, rDesc, rKind);
+            // ???
+            //App.addRecipe(newRecipe);
+            postCreateStage.close();
+            
         });
         editRecipeButton.setOnAction(e -> {
-            //todo
+            if(editflag == false){
+                editflag = true;
+                recipeDescription.setEditable(editflag);
+            }
+            else{
+                editflag = false;
+                recipeDescription.setEditable(editflag);
+            }
         });
         backButton.setOnAction(e -> {
-            //todo
+            postCreateStage.close();
         });
 
         HBox buttonArea = new HBox();
@@ -275,34 +288,103 @@ class newScreen extends VBox {
         return result;
     }
 }
- 
-// the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
-enum RecipeKind {
-    Breakfast,
-    Lunch,
-    Dinner
-}
 
-class Recipe {
-    public RecipeKind kind;
-    public String name = "";
-    public String description = "";
-    
+class DetailedViewScreen extends VBox {
+
+    private Button saveRecipeButton; 
+    private Button editRecipeButton;
+    private Button backButton; 
+    private TextArea recipeDescription;
+    private Stage postCreateStage;
+    private Scene scene;
+    private boolean saveflag;
+    private Recipe tempR;
+
+    // display the generated recipe description in a new popout window
+    // pmt = passed meal type, pml = passed meal ingredient list
+    DetailedViewScreen(Recipe r) {
+
+        tempR = r;
+        postCreateStage = new Stage();
+        recipeDescription = new TextArea();
+        recipeDescription.setWrapText(true);
+        recipeDescription.appendText(tempR.getRecipeDescription());
+        saveflag = false;
+        recipeDescription.setEditable(saveflag);
+
+        saveRecipeButton = new Button("save");
+        saveRecipeButton.setPrefSize(45, 15);
+        saveRecipeButton.setAlignment(Pos.CENTER);
+
+        editRecipeButton = new Button("edit");
+        editRecipeButton.setPrefSize(45, 15);
+        editRecipeButton.setAlignment(Pos.CENTER);
+
+        backButton = new Button("back");
+        backButton.setPrefSize(45, 15);
+        backButton.setAlignment(Pos.CENTER);
+
+        this.setPrefSize(500, 500);
+    }
+
+    public void ShowDetailedView() {
+        saveRecipeButton.setOnAction(e -> {
+            String updatedDesc = recipeDescription.getText();
+            tempR.setRecipeDescription(updatedDesc);
+            postCreateStage.close();
+        });
+        editRecipeButton.setOnAction(e -> {
+            if(saveflag == false){
+                saveflag = true;
+                recipeDescription.setEditable(saveflag);
+            }
+            else{
+                saveflag = false;
+                recipeDescription.setEditable(saveflag);
+            }
+        });
+        backButton.setOnAction(e -> {
+            postCreateStage.close();
+        });
+
+        HBox buttonArea = new HBox();
+        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.setPadding(new Insets(10, 10, 10, 10));
+        buttonArea.setSpacing(199);
+
+        VBox recipeDetail = new VBox();
+        recipeDetail.getChildren().addAll(recipeDescription);
+        recipeDetail.setPadding(new Insets(10, 10, 10, 10));
+
+        this.getChildren().addAll(buttonArea, recipeDetail);
+
+        scene = new Scene(this, 550, 550);
+
+        postCreateStage.setTitle("Generated Recipe");
+        postCreateStage.setResizable(false);
+        postCreateStage.setScene(scene);
+        postCreateStage.show();
+    }
 }
 
 // JavaFX Application main entry point
 public class App extends Application {
 
     private newScreen ns;
+    private DetailedViewScreen ds;
 
   public static void main(String[] args) {
         launch(args);
     }
 
     private ArrayList<Recipe> recipes;
-    private VBox recipesUI;
+    public VBox recipesUI;
 
-    private void addRecipe(Recipe recipe) {
+    private String rName;
+    private String rDesc;
+    private RecipeKind rKind;
+
+    public void addRecipe(Recipe recipe) {
             recipes.add(recipe);
             StackPane recipePane = new StackPane();
             
@@ -325,13 +407,18 @@ public class App extends Application {
                 descPane.getChildren().add(descInside);
 
                 // recipe title
-                Label title = new Label(recipe.name);
+                Button title = new Button(recipe.getRecipeName());
                 title.setAlignment(Pos.CENTER_LEFT);
                 BorderPane.setAlignment(title, Pos.CENTER_LEFT);
                 descInside.setLeft(title);
+                title.setOnMouseClicked(e -> {
+                    ds = new DetailedViewScreen(recipe);
+                    ds.ShowDetailedView();
+                    System.out.println(recipe.getRecipeDescription());
+                });
 
                 // recipe type
-                Label recipeType = new Label(recipe.kind.name());
+                Label recipeType = new Label(recipe.getRecipeKind().name());
                 recipeType.setAlignment(Pos.CENTER_RIGHT);
                 BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
                 descInside.setRight(recipeType);
@@ -354,7 +441,6 @@ public class App extends Application {
             recipePane.setPadding(new Insets(20.0));
 
             recipesUI.getChildren().add(recipePane);
-
     }
 
     @Override
@@ -385,15 +471,31 @@ public class App extends Application {
 
         recipesUI = new VBox();
         recipes = new ArrayList<Recipe>();
+        JSONOperations c = new JSONOperations(recipes);
+        ArrayList<Recipe> tempRecipeList = c.readFromJSON(); //returns arraylist of recipes
         recipesUI.setAlignment(Pos.TOP_CENTER);
-        for (int i = 0; i < 100; i++) {
-            Recipe toAdd = new Recipe();
-            toAdd.kind = RecipeKind.values()[i % 3];
-            toAdd.name = "Recipe #" + i;
+        for(Recipe r : tempRecipeList){
+            addRecipe(r);
+        }
+        /* 
+        for (int i = 0; i < 5; i++) {
+            rName = "Recipe #" + i;
+            rDesc = "";
+            rKind = RecipeKind.valueOf("Dinner");
+            Recipe toAdd = new Recipe(rName, rDesc, rKind);
             // for deleting recipes you probably want to store each recipe's UI object in the Recipe object and call delete through there
             
             addRecipe(toAdd);
         }
+        */
+        JSONOperations c2 = new JSONOperations(recipes);
+        c2.writeToJSON();
+        String testName = "beef soup";
+        String testDesc = "beef, carrot, lettuce, water, salt";
+        RecipeKind testKind = RecipeKind.valueOf("Dinner");
+        Recipe testRecipe = new Recipe(testName, testDesc, testKind);
+        addRecipe(testRecipe);
+        c2.writeToJSON();
         // mainBox.getChildren().add(scrollPaneContents);
         ScrollPane pane = new ScrollPane();
         pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
