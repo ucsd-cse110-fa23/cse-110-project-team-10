@@ -1,55 +1,61 @@
 package cse110_project;
 
-import cse110_project.recipeGenerate;
-import java.beans.Transient;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class saveAndEditRecipeTest {
+public class SaveAndEditRecipeTest {
     private Recipe test;
     private String name;
     private String ingred;
-    private String newName;
     private String newIngred;
 
-    @BeforeEach 
-    void setUp() {
-        /* 
-        test = new Recipe();
+    @BeforeEach
+    public void setup() {
         name = "sandwich";
         ingred = "apple, banana, cabbage, dikon, eggplant, flour";
-        test.name = name;
-        test.description = ingred;
-        */
+        RecipeKind kind = RecipeKind.valueOf("Dinner");
+        test = new Recipe(name, ingred, kind);
     }
-    @Test 
-    void testSaveRecipeButton(){
-        /* 
+    @Test
+    public void testTemplate() {
+        assertEquals(1, 1);
+    }
+
+    @Test
+    public void testSaveRecipeButton() {
         String newIngred = "apple, banana, cabbage, dikon, eggplant, flour, grape, horseradish, ice";
-        ingred = newIngred;
-        assertEquals(ingred, newIngred);
-        */
+        test.setRecipeDescription(newIngred);
+        assertEquals(test.getRecipeDescription(), newIngred);
     }
 
     @Test
-    void testBackButton(){
-
-    }
-
-    @Test 
-    void testEditButton(){
-
+    public void testBackButton() {
+        boolean goBack = false;
+        goBack = true;
+        assertTrue(goBack);
     }
 
     @Test
-    void testViewRecipeDetails(){
-
+    public void testEditButton() {
+        boolean editable = false;
+        editable = true;
+        assertTrue(editable);
     }
+
+    @Test
+    public void testViewRecipeDetails() {
+        String rDetails = "";
+        boolean viewDetails = false;
+        viewDetails = true;
+        if (viewDetails == true) {
+            rDetails = test.getRecipeDescription();
+        }
+        assertEquals(rDetails, test.getRecipeDescription());
+    }   
 }

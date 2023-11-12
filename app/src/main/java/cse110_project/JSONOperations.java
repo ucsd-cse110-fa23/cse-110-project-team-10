@@ -16,11 +16,11 @@ import java.util.ArrayList;
 public class JSONOperations {
     private ArrayList<Recipe> current_recipes;
 
-    csvOperations(ArrayList<Recipe> current) {
+    JSONOperations(ArrayList<Recipe> current) {
         current_recipes = current;
     }
 
-    public String writeToJSON() {
+    public void writeToJSON() {
         JSONObject cr; 
 
         //takes arraylist and makes json file
@@ -35,7 +35,7 @@ public class JSONOperations {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return;
     }
     public ArrayList<Recipe> readFromJSON() {
         ArrayList<Recipe> temp = new ArrayList<Recipe>();
