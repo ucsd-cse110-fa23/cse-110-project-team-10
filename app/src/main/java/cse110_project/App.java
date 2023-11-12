@@ -47,16 +47,19 @@ class postRecipeCreate extends VBox {
     public postRecipeCreate(String pmt, String pml) {
         recipeGenerate rg = new recipeGenerate(pmt, pml);
         
-        String ro = "";
 
-        try {
-            ro = rg.generate();
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            e.printStackTrace();
+        boolean done = false;
+        while(!done) {
+            try {
+                String ro = rg.generate();
+                rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
+                rDesc = ro.substring(ro.indexOf("Ingredients"));
+                rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')).toLowerCase().strip());
+                done = true;
+            } catch(Exception e) {
+                System.out.println("The AI produced invalid response, trying again: " + e);
+            }
         }
-        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
-        rDesc = ro.substring(ro.indexOf("Ingredients"));
-        rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
 
         postCreateStage = new Stage();
         recipeDescription = new TextArea();
@@ -173,7 +176,7 @@ class Prompt extends HBox {
 class newScreen extends VBox {
     
     private static final String RESPONSE = "Your response is: ";
-    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
+    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
 
     private Prompt mealPrompt;
@@ -485,7 +488,7 @@ public class App extends Application {
         for (int i = 0; i < 5; i++) {
             rName = "Recipe #" + i;
             rDesc = "";
-            rKind = RecipeKind.valueOf("Dinner");
+            rKind = RecipeKind.valueOf("dinner");
             Recipe toAdd = new Recipe(rName, rDesc, rKind);
             // for deleting recipes you probably want to store each recipe's UI object in the Recipe object and call delete through there
             
@@ -496,7 +499,7 @@ public class App extends Application {
         c2.writeToJSON();
         String testName = "beef soup";
         String testDesc = "beef, carrot, lettuce, water, salt";
-        RecipeKind testKind = RecipeKind.valueOf("Dinner");
+        RecipeKind testKind = RecipeKind.valueOf("dinner");
         Recipe testRecipe = new Recipe(testName, testDesc, testKind);
         addRecipe(testRecipe);
         c2.writeToJSON();

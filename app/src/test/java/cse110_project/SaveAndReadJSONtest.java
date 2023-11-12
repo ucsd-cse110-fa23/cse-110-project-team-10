@@ -31,7 +31,7 @@ public class SaveAndReadJSONtest {
         for (int i = 0; i < 5; i++) {
             rName = "Recipe #" + i;
             rDesc = "";
-            rKind = RecipeKind.valueOf("Dinner");
+            rKind = RecipeKind.valueOf("dinner");
             Recipe toAdd = new Recipe(rName, rDesc, rKind);
             testList.add(toAdd);
         }

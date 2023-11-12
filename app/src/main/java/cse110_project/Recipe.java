@@ -1,9 +1,10 @@
 package cse110_project;
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
+// they're lower case so that the AI's outputs can be consistent by calling .toLower() on it
 enum RecipeKind {
-    Breakfast,
-    Lunch,
-    Dinner
+    breakfast,
+    lunch,
+    dinner
 }
 
 public class Recipe {
