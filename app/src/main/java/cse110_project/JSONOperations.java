@@ -24,7 +24,7 @@ public class JSONOperations {
         cr = new JSONObject();
         ArrayList<JSONObject> asObjects = new ArrayList<JSONObject>();
         for(Recipe r : manager.getRecipes()) {
-            asObjects.add(intoJSON(r));
+            asObjects.add(0, intoJSON(r));
         }
         cr.put("recipes", asObjects);
 
