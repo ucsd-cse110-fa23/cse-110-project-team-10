@@ -19,7 +19,7 @@ public class SaveAndEditRecipeTest {
     public void setup() {
         name = "sandwich";
         ingred = "apple, banana, cabbage, dikon, eggplant, flour";
-        RecipeKind kind = RecipeKind.valueOf("Dinner");
+        RecipeKind kind = RecipeKind.valueOf("dinner");
         test = new Recipe(name, ingred, kind);
     }
     @Test

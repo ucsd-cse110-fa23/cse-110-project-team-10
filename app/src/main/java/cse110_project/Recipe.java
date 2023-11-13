@@ -1,21 +1,23 @@
 package cse110_project;
 // the names of these enums are shown in UI so should be nice and not programmery. If changed have to update
+// they're lower case so that the AI's outputs can be consistent by calling .toLower() on it
 enum RecipeKind {
-    Breakfast,
-    Lunch,
-    Dinner
+    breakfast,
+    lunch,
+    dinner
 }
 
 public class Recipe {
-    private RecipeKind kind;
+    private RecipeKind kind = RecipeKind.breakfast;
     private String name = "";
     private String description = "";
 
-    Recipe(String n, String i, RecipeKind rk) {
-        name = n;
-        description = i;
-        kind = rk;
+    Recipe(String name, String description, RecipeKind kind) {
+        this.name = name;
+        this.description = description;
+        this.kind = kind;
     }
+    Recipe() {}
 
     public String getRecipeName(){
         return name;
