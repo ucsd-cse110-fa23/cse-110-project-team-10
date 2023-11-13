@@ -105,7 +105,7 @@ class postRecipeCreate extends VBox {
     public void postRecipeCreateDisplay(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
-            Recipe newRecipe = new Recipe(rName, rDesc, rKind);
+            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind);
 
             app.addRecipeUI(newRecipe);
             app.getState().addRecipe(newRecipe);
