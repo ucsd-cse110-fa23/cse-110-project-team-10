@@ -5,11 +5,16 @@ package cse110_project;
 
 import java.io.*;
 import java.util.ArrayList;
+import org.json.JSONObject;
 import java.util.Collections;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -17,6 +22,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+
 import javafx.scene.control.TextField;
 import java.nio.file.Paths;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
@@ -28,6 +35,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 class postRecipeCreate extends VBox {
 
@@ -46,19 +56,28 @@ class postRecipeCreate extends VBox {
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
     public postRecipeCreate(String pmt, String pml) {
-        recipeGenerate rg = new recipeGenerate(pmt, pml);
-
-        boolean done = false;
-        while (!done) {
-            try {
-                String ro = rg.generate();
-                rName = ro.substring(ro.indexOf(':') + 2, ro.indexOf('('));
-                rDesc = ro.substring(ro.indexOf("Ingredients"));
-                rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(') + 1, ro.indexOf(')')).toLowerCase().strip());
-                done = true;
-            } catch (Exception e) {
-                System.out.println("The AI produced invalid response, trying again: " + e);
-            }
+        JSONObject toSend = new JSONObject();
+        toSend.put("pmt", pmt);
+        toSend.put("pml", pml);
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            // Create the request object
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(new URI(App.serverURL + "/genrecipe"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+            // Send the request and receive the response
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // Process the response
+            String responseBody = response.body();
+            JSONObject responseJson = new JSONObject(responseBody);
+            rName = responseJson.getString("name");
+            rDesc = responseJson.getString("desc");
+            rKind = RecipeKind.valueOf(responseJson.getString("kind"));
+        } catch (Exception e) {
+            System.err.println("Failed to generate");
+            e.printStackTrace();
         }
 
         postCreateStage = new Stage();
@@ -86,11 +105,11 @@ class postRecipeCreate extends VBox {
     public void postRecipeCreateDisplay(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
-            Recipe newRecipe = new Recipe(rName, rDesc, rKind);
+            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind);
 
             app.addRecipeUI(newRecipe);
             app.getState().addRecipe(newRecipe);
-            app.writeStateToFile();
+            app.writeServerState();
 
             postCreateStage.close();
         });
@@ -287,16 +306,83 @@ class newScreen extends VBox {
         inputStage.show();
     }
 
+    // Helper method to write a file to the output stream in multipart form data
+    // format
+    private static void writeFileToOutputStream(OutputStream outputStream,
+            File file, String boundary) throws IOException {
+        outputStream.write(("--" + boundary + "\r\n").getBytes());
+        outputStream.write(
+                ("Content-Disposition: form-data; name=\"file\"; filename=\"" +
+                        file.getName() + "\"\r\n").getBytes());
+        outputStream.write(("Content-Type: audio/mpeg\r\n\r\n").getBytes());
+
+        FileInputStream fileInputStream = new FileInputStream(file);
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+        fileInputStream.close();
+    }
+
     private String getVoiceInput() throws Exception {
         Whisper voiceInput = new Whisper();
-
-        // Create file object from file path
         String path = "recording.wav";
         File file = new File(path);
 
-        String result = voiceInput.handleVoiceInput(file);
+        URL url = new URI(App.serverURL + "/whisper").toURL();
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+
+        // Set up request headers
+        String boundary = "Boundary-" + System.currentTimeMillis();
+        connection.setRequestProperty(
+                "Content-Type",
+                "multipart/form-data; boundary=" + boundary);
+
+        // Set up output stream to write request body
+        OutputStream outputStream = connection.getOutputStream();
+
+        // Write file parameter to request body
+        writeFileToOutputStream(outputStream, file, boundary);
+
+        // Write closing boundary to request body
+        outputStream.write(("\r\n--" + boundary + "--\r\n").getBytes());
+
+        // Flush and close output stream
+        outputStream.flush();
+        outputStream.close();
+
+        // Get response code
+        int responseCode = connection.getResponseCode();
+
+        String result = "There was an internal error";
+        // Check response code and handle response accordingly
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            String response = readStream(connection.getInputStream());
+            JSONObject responseJson = new JSONObject(response);
+            result = responseJson.getString("text");
+        } else {
+            String errorResponse = readStream(connection.getErrorStream());
+            System.out.println("Failed to generate: " + errorResponse);
+        }
+
+        // Disconnect connection
+        connection.disconnect();
 
         return result;
+    }
+
+    private String readStream(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder response = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            response.append(line);
+        }
+        reader.close();
+        return response.toString();
     }
 }
 
@@ -342,7 +428,7 @@ class DetailedViewScreen extends VBox {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             tempR.setRecipeDescription(updatedDesc);
-            app.writeStateToFile();
+            app.writeServerState();
 
             postCreateStage.close();
         });
@@ -384,8 +470,7 @@ public class App extends Application {
 
     private newScreen ns;
     private DetailedViewScreen ds;
-
-    private final String saveFilePath = "recipes.json";
+    public static final String serverURL = "http://127.0.0.1:8100";
 
     public static void main(String[] args) {
         launch(args);
@@ -402,17 +487,46 @@ public class App extends Application {
     private String rName;
     private String rDesc;
     private RecipeKind rKind;
+    private Server server = new Server();
 
-    public void updateFromState() {
-        for (Recipe r : state.getRecipes()) {
-            addRecipeUI(r);
+    public void updateFromServerState() {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            // Create the request object
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(new URI(App.serverURL + "/recipestate"))
+                    .header("Content-Type", "application/json")
+                    .GET().build();
+            // Send the request and receive the response
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            String responseBody = response.body();
+            state = JSONOperations.fromJSONString(responseBody);
+
+            for (Recipe r : state.getRecipes()) {
+                addRecipeUI(r);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to update from remote state");
+            e.printStackTrace();
+            state = new RecipeStateManager();
         }
     }
 
-    public void writeStateToFile() {
-        try (FileWriter fw = new FileWriter(saveFilePath)) {
-            fw.write(JSONOperations.intoJSONString(state));
-        } catch (IOException e) {
+    public void writeServerState() {
+        String toSend = JSONOperations.intoJSONString(state);
+        try {
+            HttpClient client = HttpClient.newHttpClient();
+            // Create the request object
+            HttpRequest request = HttpRequest
+                    .newBuilder()
+                    .uri(new URI(App.serverURL + "/recipestate"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+            // Send the request and receive the response
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            System.err.println("Failed to save remote state");
             e.printStackTrace();
         }
     }
@@ -465,7 +579,7 @@ public class App extends Application {
             deleteButton.setOnMouseClicked(e -> {
                 state.deleteRecipe(recipe);
                 recipesUI.getChildren().remove(recipePane);
-                writeStateToFile();
+                writeServerState();
             });
             delPane.setPadding(new Insets(20.0));
             recipeHbox.getChildren().add(delPane);
@@ -477,7 +591,13 @@ public class App extends Application {
     }
 
     @Override
+    public void stop() {
+        server.stopServer();
+    }
+
+    @Override
     public void start(Stage primaryStage) {
+        server.startServer();
         primaryStage.setTitle("Recipe Run");
 
         VBox mainBox = new VBox();
@@ -502,19 +622,8 @@ public class App extends Application {
         }
 
         recipesUI = new VBox();
-        state = new RecipeStateManager();
-        String savedData = "";
-        try {
-            savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if (savedData.length() > 0) {
-            System.out.println("Loading from " + saveFilePath);
-            state = JSONOperations.fromJSONString(savedData);
-        }
 
-        updateFromState();
+        updateFromServerState();
 
         recipesUI.setAlignment(Pos.TOP_CENTER);
         // mainBox.getChildren().add(scrollPaneContents);
