@@ -5,9 +5,8 @@ package cse110_project;
 
 import java.io.*;
 import java.util.ArrayList;
-
 import org.json.JSONObject;
-
+import java.util.Collections;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
@@ -195,7 +194,7 @@ class Prompt extends HBox {
 class newScreen extends VBox {
 
     private static final String RESPONSE = "Your response is: ";
-    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or dinner";
+    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
 
     private Prompt mealPrompt;
@@ -588,7 +587,7 @@ public class App extends Application {
 
         recipePane.setPadding(new Insets(20.0));
 
-        recipesUI.getChildren().add(recipePane);
+        recipesUI.getChildren().add(0, recipePane);
     }
 
     @Override

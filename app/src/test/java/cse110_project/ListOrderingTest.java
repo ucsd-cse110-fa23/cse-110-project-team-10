@@ -37,8 +37,8 @@ public class ListOrderingTest {
      */
     @Test
     public void testRecipesOrder() throws Exception {
-        assertEquals("Recipe: 0", testRecipeList.getRecipes().get(2).getRecipeName());
-        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(0).getRecipeName());
+        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(2).getRecipeName());
+        assertEquals("Recipe: 0", testRecipeList.getRecipes().get(0).getRecipeName());
     }
 
     /**
@@ -47,7 +47,7 @@ public class ListOrderingTest {
     @Test
     public void testOrderAfterDelete() throws Exception {
         testRecipeList.deleteRecipe(testRecipeList.getRecipes().get(1));
-        assertEquals("Recipe: 0", testRecipeList.getRecipes().get(1).getRecipeName());
+        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(1).getRecipeName());
     }
 
     /**
@@ -57,8 +57,8 @@ public class ListOrderingTest {
     public void testOrderAfterAdd() throws Exception {
         Recipe newRecipe = new Recipe("new name", "new details", RecipeKind.valueOf("breakfast"));
         testRecipeList.addRecipe(newRecipe);
-        assertEquals(newRecipe, testRecipeList.getRecipes().get(0));
-        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(1).getRecipeName());
+        assertEquals(newRecipe, testRecipeList.getRecipes().get(3));
+        assertEquals("Recipe: 1", testRecipeList.getRecipes().get(1).getRecipeName());
     }
 
     /**
@@ -76,9 +76,9 @@ public class ListOrderingTest {
         Recipe newRecipe = new Recipe("name", result, RecipeKind.valueOf("dinner"));
         testRecipeList.addRecipe(newRecipe);
 
-        assertEquals("name", testRecipeList.getRecipes().get(0).getRecipeName());
-        assertEquals(result, testRecipeList.getRecipes().get(0).getRecipeDescription());
+        assertEquals("name", testRecipeList.getRecipes().get(3).getRecipeName());
+        assertEquals(result, testRecipeList.getRecipes().get(3).getRecipeDescription());
 
-        assertEquals(RecipeKind.valueOf("lunch"), testRecipeList.getRecipes().get(2).getRecipeKind());
+        assertEquals(RecipeKind.valueOf("lunch"), testRecipeList.getRecipes().get(1).getRecipeKind());
     }
 }
