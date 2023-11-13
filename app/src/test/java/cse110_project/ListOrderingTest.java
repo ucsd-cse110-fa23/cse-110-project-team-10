@@ -15,20 +15,20 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 
 public class ListOrderingTest {
-    ArrayList<Recipe> testRecipeList;
+    RecipeStateManager testRecipeList;
     String recipeName;
     String recipeDetails;
     RecipeKind mealType;
 
     @BeforeEach
     public void setup() {
-        testRecipeList = new ArrayList<>();
+        testRecipeList = new RecipeStateManager();
         for(int i = 0; i < 3; i++){
             recipeName = "Recipe: " + i;
             recipeDetails = "";
-            mealType = RecipeKind.valueOf("Lunch");
+            mealType = RecipeKind.valueOf("lunch");
             Recipe recipe = new Recipe(recipeName, recipeDetails, mealType);
-            testRecipeList.add(0, recipe);
+            testRecipeList.addRecipe(recipe);
         }
     }
 
@@ -37,19 +37,28 @@ public class ListOrderingTest {
      */
     @Test
     public void testRecipesOrder() throws Exception {
-        assertEquals("Recipe: 0", testRecipeList.get(2).getRecipeName());
-        assertEquals("Recipe: 2", testRecipeList.get(0).getRecipeName());
+        assertEquals("Recipe: 0", testRecipeList.getRecipes().get(2).getRecipeName());
+        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(0).getRecipeName());
+    }
+
+    /**
+     * Test the positions of recipe after delete
+     */
+    @Test
+    public void testOrderAfterDelete() throws Exception {
+        testRecipeList.deleteRecipe(testRecipeList.getRecipes().get(1));
+        assertEquals("Recipe: 0", testRecipeList.getRecipes().get(1).getRecipeName());
     }
 
     /**
      * Test the position of the newly added recipe
      */
     @Test
-    public void testNewRecipeOrder() throws Exception {
-        Recipe newRecipe = new Recipe("new name", "new details", RecipeKind.valueOf("Breakfast"));
-        testRecipeList.add(0,newRecipe);
-        assertEquals(newRecipe, testRecipeList.get(0));
-        assertEquals("Recipe: 2", testRecipeList.get(1).getRecipeName());
+    public void testOrderAfterAdd() throws Exception {
+        Recipe newRecipe = new Recipe("new name", "new details", RecipeKind.valueOf("breakfast"));
+        testRecipeList.addRecipe(newRecipe);
+        assertEquals(newRecipe, testRecipeList.getRecipes().get(0));
+        assertEquals("Recipe: 2", testRecipeList.getRecipes().get(1).getRecipeName());
     }
 
     /**
@@ -64,12 +73,12 @@ public class ListOrderingTest {
         mockRecipeGenerate gpt = new mockRecipeGenerate(mType, ingredient);
 
         String result = gpt.generate();
-        Recipe newRecipe = new Recipe("name", result, RecipeKind.valueOf("Dinner"));
-        testRecipeList.add(0,newRecipe);
+        Recipe newRecipe = new Recipe("name", result, RecipeKind.valueOf("dinner"));
+        testRecipeList.addRecipe(newRecipe);
 
-        assertEquals("name", testRecipeList.get(0).getRecipeName());
-        assertEquals(result, testRecipeList.get(0).getRecipeDescription());
+        assertEquals("name", testRecipeList.getRecipes().get(0).getRecipeName());
+        assertEquals(result, testRecipeList.getRecipes().get(0).getRecipeDescription());
 
-        assertEquals(RecipeKind.valueOf("Lunch"), testRecipeList.get(2).getRecipeKind());
+        assertEquals(RecipeKind.valueOf("lunch"), testRecipeList.getRecipes().get(2).getRecipeKind());
     }
 }

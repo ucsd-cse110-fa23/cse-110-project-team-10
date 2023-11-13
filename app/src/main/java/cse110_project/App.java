@@ -16,6 +16,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import java.nio.file.Files;
+import javafx.scene.control.TextField;
+import java.nio.file.Paths;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
@@ -28,13 +31,13 @@ import javafx.geometry.Pos;
 
 class postRecipeCreate extends VBox {
 
-    public String rName; 
+    public String rName;
     public String rDesc;
     public RecipeKind rKind;
 
-    private Button saveRecipeButton; 
+    private Button saveRecipeButton;
     private Button editRecipeButton;
-    private Button backButton; 
+    private Button backButton;
     private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
@@ -44,17 +47,19 @@ class postRecipeCreate extends VBox {
     // pmt = passed meal type, pml = passed meal ingredient list
     public postRecipeCreate(String pmt, String pml) {
         recipeGenerate rg = new recipeGenerate(pmt, pml);
-        
-        String ro = "";
 
-        try {
-            ro = rg.generate();
-        } catch (IOException | InterruptedException | URISyntaxException e) {
-            e.printStackTrace();
+        boolean done = false;
+        while (!done) {
+            try {
+                String ro = rg.generate();
+                rName = ro.substring(ro.indexOf(':') + 2, ro.indexOf('('));
+                rDesc = ro.substring(ro.indexOf("Ingredients"));
+                rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(') + 1, ro.indexOf(')')).toLowerCase().strip());
+                done = true;
+            } catch (Exception e) {
+                System.out.println("The AI produced invalid response, trying again: " + e);
+            }
         }
-        rName = ro.substring(ro.indexOf(':')+2, ro.indexOf('('));
-        rDesc = ro.substring(ro.indexOf("Ingredients"));
-        rKind = RecipeKind.valueOf(ro.substring(ro.indexOf('(')+1, ro.indexOf(')')));
 
         postCreateStage = new Stage();
         recipeDescription = new TextArea();
@@ -78,21 +83,22 @@ class postRecipeCreate extends VBox {
         this.setPrefSize(500, 500);
     }
 
-    public void postRecipeCreateDisplay() {
+    public void postRecipeCreateDisplay(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, rDesc, rKind);
-            // ???
-            //App.addRecipe(newRecipe);
+
+            app.addRecipeUI(newRecipe);
+            app.getState().addRecipe(newRecipe);
+            app.writeStateToFile();
+
             postCreateStage.close();
-            
         });
         editRecipeButton.setOnAction(e -> {
-            if(editflag == false){
+            if (editflag == false) {
                 editflag = true;
                 recipeDescription.setEditable(editflag);
-            }
-            else{
+            } else {
                 editflag = false;
                 recipeDescription.setEditable(editflag);
             }
@@ -109,7 +115,7 @@ class postRecipeCreate extends VBox {
         VBox recipeDetail = new VBox();
         recipeDetail.getChildren().addAll(recipeDescription);
         recipeDetail.setPadding(new Insets(10, 10, 10, 10));
-        
+
         ScrollPane sp = new ScrollPane(recipeDetail);
         sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
@@ -125,13 +131,13 @@ class postRecipeCreate extends VBox {
     }
 }
 
-//This class creates prompts for user input
+// This class creates prompts for user input
 class Prompt extends HBox {
     private Label prompt;
     private Button micButton;
     private boolean isRecord;
 
-    Prompt(){
+    Prompt() {
         prompt = new Label();
         prompt.setPrefSize(500, 250);
         prompt.setWrapText(true);
@@ -145,11 +151,10 @@ class Prompt extends HBox {
         this.setAlignment(Pos.CENTER);
     }
 
-    public void toggleRecord(){
-        if(!isRecord){
+    public void toggleRecord() {
+        if (!isRecord) {
             isRecord = true;
-        }
-        else{
+        } else {
             isRecord = false;
         }
     }
@@ -158,19 +163,19 @@ class Prompt extends HBox {
         return this.micButton;
     }
 
-    public void setLabel(String text){
+    public void setLabel(String text) {
         prompt.setText(text);
     }
 
-    public boolean getRecordStatus(){
+    public boolean getRecordStatus() {
         return isRecord;
     }
 }
 
 class newScreen extends VBox {
-    
+
     private static final String RESPONSE = "Your response is: ";
-    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
+    private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
 
     private Prompt mealPrompt;
@@ -190,10 +195,10 @@ class newScreen extends VBox {
 
     private postRecipeCreate prc;
 
-    private String mealType ; 
-    private String mealList ; 
+    private String mealType = "";
+    private String mealList = "";
 
-    String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";  
+    String defaultLabelStyle = "-fx-font: 13 arial; -fx-pref-width: 175px; -fx-pref-height: 50px; -fx-text-fill: red; visibility: hidden";
 
     newScreen() {
         inputStage = new Stage();
@@ -208,6 +213,7 @@ class newScreen extends VBox {
         this.setPrefSize(500, 800);
 
         doneButton = new Button("Done");
+        doneButton.setDisable(true);
 
         mealPrompt = new Prompt();
         ingredientPrompt = new Prompt();
@@ -216,48 +222,54 @@ class newScreen extends VBox {
         ingredientMicButton = ingredientPrompt.getMicButton();
     }
 
-    public void voiceInputScreen() {
+    public void voiceInputScreen(App app) {
         mealPrompt.setLabel(MEAL_PROMPT);
 
-        //Record and display user's response for meal type
+        // Record and display user's response for meal type
         mealTypeMicButton.setOnAction(e -> {
             try {
                 mealPrompt.toggleRecord();
-                if(mealPrompt.getRecordStatus())
+                if (mealPrompt.getRecordStatus())
                     aRecord.startRecording();
-                else{
+                else {
                     aRecord.stopRecording();
                     mealType = getVoiceInput();
                     mealPrompt.setLabel(RESPONSE + mealType);
-                    //Prompt user to input ingredient list after finish recording meal type
+                    // Prompt user to input ingredient list after finish recording meal type
                     ingredientPrompt.setLabel(INGREDIENT_PROMPT);
+                    if (mealType != "" && mealList != "") {
+                        doneButton.setDisable(false);
+                    }
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
         });
 
-        //Record and display user's response for ingredient list
+        // Record and display user's response for ingredient list
         ingredientMicButton.setOnAction(e -> {
             try {
                 ingredientPrompt.toggleRecord();
-                if(ingredientPrompt.getRecordStatus())
+                if (ingredientPrompt.getRecordStatus())
                     aRecord.startRecording();
-                else{
+                else {
                     aRecord.stopRecording();
                     mealList = getVoiceInput();
                     ingredientPrompt.setLabel(RESPONSE + mealList);
+                    if (mealType != "" && mealList != "") {
+                        doneButton.setDisable(false);
+                    }
                 }
             } catch (Exception exc) {
                 exc.printStackTrace();
             }
         });
 
-        //Generate and display recipe page
+        // Generate and display recipe page
         doneButton.setOnAction(e -> {
             try {
                 prc = new postRecipeCreate(mealType, mealList);
-                prc.postRecipeCreateDisplay();
+                prc.postRecipeCreateDisplay(app);
                 inputStage.close();
             } catch (Exception exc) {
                 exc.printStackTrace();
@@ -267,7 +279,6 @@ class newScreen extends VBox {
         this.getChildren().addAll(mealPrompt, ingredientPrompt, doneButton, recordingLabel);
         this.setSpacing(15);
 
-
         scene = new Scene(this, 600, 600);
 
         inputStage.setTitle("Create Recipe");
@@ -276,13 +287,13 @@ class newScreen extends VBox {
         inputStage.show();
     }
 
-    private String getVoiceInput()throws Exception{
+    private String getVoiceInput() throws Exception {
         Whisper voiceInput = new Whisper();
 
         // Create file object from file path
         String path = "recording.wav";
         File file = new File(path);
-        
+
         String result = voiceInput.handleVoiceInput(file);
 
         return result;
@@ -291,9 +302,9 @@ class newScreen extends VBox {
 
 class DetailedViewScreen extends VBox {
 
-    private Button saveRecipeButton; 
+    private Button saveRecipeButton;
     private Button editRecipeButton;
-    private Button backButton; 
+    private Button backButton;
     private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
@@ -327,18 +338,19 @@ class DetailedViewScreen extends VBox {
         this.setPrefSize(500, 500);
     }
 
-    public void ShowDetailedView() {
+    public void ShowDetailedView(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             tempR.setRecipeDescription(updatedDesc);
+            app.writeStateToFile();
+
             postCreateStage.close();
         });
         editRecipeButton.setOnAction(e -> {
-            if(saveflag == false){
+            if (saveflag == false) {
                 saveflag = true;
                 recipeDescription.setEditable(saveflag);
-            }
-            else{
+            } else {
                 saveflag = false;
                 recipeDescription.setEditable(saveflag);
             }
@@ -373,74 +385,95 @@ public class App extends Application {
     private newScreen ns;
     private DetailedViewScreen ds;
 
-  public static void main(String[] args) {
+    private final String saveFilePath = "recipes.json";
+
+    public static void main(String[] args) {
         launch(args);
     }
 
-    private ArrayList<Recipe> recipes;
+    private RecipeStateManager state;
+
+    RecipeStateManager getState() {
+        return state;
+    }
+
     public VBox recipesUI;
 
     private String rName;
     private String rDesc;
     private RecipeKind rKind;
 
-    public void addRecipe(Recipe recipe) {
-            recipes.add(0,recipe);
-            StackPane recipePane = new StackPane();
-            
-            HBox.setHgrow(recipePane, Priority.ALWAYS);
+    public void updateFromState() {
+        for (Recipe r : state.getRecipes()) {
+            addRecipeUI(r);
+        }
+    }
 
-            HBox recipeHbox = new HBox(20.0);
-            recipePane.getChildren().add(recipeHbox);
-            StackPane.setAlignment(recipeHbox, Pos.CENTER);
-            recipeHbox.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+    public void writeStateToFile() {
+        try (FileWriter fw = new FileWriter(saveFilePath)) {
+            fw.write(JSONOperations.intoJSONString(state));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-            recipeHbox.setMinHeight(100.0);
+    public void addRecipeUI(Recipe recipe) {
+        StackPane recipePane = new StackPane();
 
-            {
-                StackPane descPane = new StackPane();
-                HBox.setHgrow(descPane, Priority.ALWAYS);
+        HBox.setHgrow(recipePane, Priority.ALWAYS);
 
-                BorderPane descInside = new BorderPane();
-                descInside.setPadding(new Insets(20.0));
-                descInside.setStyle("-fx-border-color: black; -fx-border-width: 1;");
-                descPane.getChildren().add(descInside);
+        HBox recipeHbox = new HBox(20.0);
+        recipePane.getChildren().add(recipeHbox);
+        StackPane.setAlignment(recipeHbox, Pos.CENTER);
+        recipeHbox.setStyle("-fx-border-color: black; -fx-border-width: 1;");
 
-                // recipe title
-                Button title = new Button(recipe.getRecipeName());
-                title.setAlignment(Pos.CENTER_LEFT);
-                BorderPane.setAlignment(title, Pos.CENTER_LEFT);
-                descInside.setLeft(title);
-                title.setOnMouseClicked(e -> {
-                    ds = new DetailedViewScreen(recipe);
-                    ds.ShowDetailedView();
-                    System.out.println(recipe.getRecipeDescription());
-                });
+        recipeHbox.setMinHeight(100.0);
 
-                // recipe type
-                Label recipeType = new Label(recipe.getRecipeKind().name());
-                recipeType.setAlignment(Pos.CENTER_RIGHT);
-                BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
-                descInside.setRight(recipeType);
+        {
+            StackPane descPane = new StackPane();
+            HBox.setHgrow(descPane, Priority.ALWAYS);
 
-                recipeHbox.getChildren().add(descPane);
-            }
+            BorderPane descInside = new BorderPane();
+            descInside.setPadding(new Insets(20.0));
+            descInside.setStyle("-fx-border-color: black; -fx-border-width: 1;");
+            descPane.getChildren().add(descInside);
 
-            {
-                StackPane delPane = new StackPane();
-                Button deleteButton = new Button("Delete");
-                delPane.getChildren().add(deleteButton);
-                deleteButton.setOnMouseClicked(e -> {
-                    recipes.remove(recipe);
-                    recipesUI.getChildren().remove(recipePane);
-                });
-                delPane.setPadding(new Insets(20.0));
-                recipeHbox.getChildren().add(delPane);
-            }
+            // recipe title
+            Button title = new Button(recipe.getRecipeName());
+            title.setAlignment(Pos.CENTER_LEFT);
+            BorderPane.setAlignment(title, Pos.CENTER_LEFT);
+            descInside.setLeft(title);
+            title.setOnMouseClicked(e -> {
+                ds = new DetailedViewScreen(recipe);
+                ds.ShowDetailedView(this);
+                System.out.println(recipe.getRecipeDescription());
+            });
 
-            recipePane.setPadding(new Insets(20.0));
+            // recipe type
+            Label recipeType = new Label(recipe.getRecipeKind().name());
+            recipeType.setAlignment(Pos.CENTER_RIGHT);
+            BorderPane.setAlignment(recipeType, Pos.CENTER_RIGHT);
+            descInside.setRight(recipeType);
 
-            recipesUI.getChildren().add(recipePane);
+            recipeHbox.getChildren().add(descPane);
+        }
+
+        {
+            StackPane delPane = new StackPane();
+            Button deleteButton = new Button("Delete");
+            delPane.getChildren().add(deleteButton);
+            deleteButton.setOnMouseClicked(e -> {
+                state.deleteRecipe(recipe);
+                recipesUI.getChildren().remove(recipePane);
+                writeStateToFile();
+            });
+            delPane.setPadding(new Insets(20.0));
+            recipeHbox.getChildren().add(delPane);
+        }
+
+        recipePane.setPadding(new Insets(20.0));
+
+        recipesUI.getChildren().add(recipePane);
     }
 
     @Override
@@ -459,7 +492,7 @@ public class App extends Application {
 
             newRecipe.setOnMouseClicked(e -> {
                 ns = new newScreen();
-                ns.voiceInputScreen();
+                ns.voiceInputScreen(this);
             });
 
             Region spacer = new Region();
@@ -469,14 +502,21 @@ public class App extends Application {
         }
 
         recipesUI = new VBox();
-        recipes = new ArrayList<Recipe>();
-        JSONOperations c = new JSONOperations(recipes);
-        ArrayList<Recipe> tempRecipeList = c.readFromJSON(); //returns arraylist of recipes
-        recipesUI.setAlignment(Pos.TOP_CENTER);
-        for(Recipe r : tempRecipeList){
-            addRecipe(r);
+        state = new RecipeStateManager();
+        String savedData = "";
+        try {
+            savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (savedData.length() > 0) {
+            System.out.println("Loading from " + saveFilePath);
+            state = JSONOperations.fromJSONString(savedData);
         }
 
+        updateFromState();
+
+        recipesUI.setAlignment(Pos.TOP_CENTER);
         // mainBox.getChildren().add(scrollPaneContents);
         ScrollPane pane = new ScrollPane();
         pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {

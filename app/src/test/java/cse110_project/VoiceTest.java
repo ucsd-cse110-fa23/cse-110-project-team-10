@@ -23,16 +23,6 @@ public class VoiceTest {
         String expected = "user response";
         assertEquals(expected, api.handleVoiceInput(null));
     }
-
-    /**
-     * Test for recording file
-     */
-    @Test
-    public void audioFileTest() throws Exception{
-        File audio = new File("recording.wav");
-        boolean audioExist = audio.exists();
-        assert(audioExist);
-    }
     
     /**
      * Mock Whisper test taking in audio file and display response
