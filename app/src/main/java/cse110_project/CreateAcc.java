@@ -39,6 +39,7 @@ class CreateBox extends VBox {
     private Info username;
     private Info password;
     private Info confirmPass;
+    private boolean isMatch;
 
     CreateBox(){
         this.setSpacing(5);
@@ -49,10 +50,20 @@ class CreateBox extends VBox {
 
         this.getChildren().addAll(username, password, confirmPass);
     }
+
+    public void checkPass(){
+        if(password.getUserInfo() == confirmPass.getUserInfo()){
+            isMatch = true;
+        }
+        else{
+            isMatch = false;
+        }
+    }
 }
 
 class CreateScreen extends BorderPane {
     private CreateBox cBox;
+    private Button createButton;
 
     CreateScreen(){
         cBox = new CreateBox();
