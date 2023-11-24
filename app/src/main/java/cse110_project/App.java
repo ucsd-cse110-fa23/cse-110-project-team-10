@@ -4,14 +4,9 @@
 package cse110_project;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 import org.json.JSONObject;
-import java.util.Collections;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -254,8 +249,9 @@ class newScreen extends VBox {
                 else {
                     aRecord.stopRecording();
                     mealType = getVoiceInput();
-                    if(mealType.toLowerCase().contains("breakfest")){
-                        mealType = "breakfest";
+                    //checking if user mention any of the mealtype
+                    if(mealType.toLowerCase().contains("breakfast")){
+                        mealType = "breakfast";
                     }else if(mealType.toLowerCase().contains("lunch")){
                         mealType = "lunch";
                     }else if(mealType.toLowerCase().contains("dinner")){
@@ -263,6 +259,7 @@ class newScreen extends VBox {
                     }else{
                         mealType = "";
                     }
+
                     if(mealType != ""){
                         mealPrompt.setLabel(RESPONSE + mealType);
                     }else{

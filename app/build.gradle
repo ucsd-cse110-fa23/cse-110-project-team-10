@@ -28,7 +28,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'cse110_project.App'
+    mainClass = 'cse110_project.CreateAcc'
 }
 
 run {
