@@ -15,6 +15,66 @@ import javafx.scene.text.TextAlignment;
 import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
+import org.json.JSONObject;
+import org.json.JSONArray;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+
+class AccJSON {
+    //create account JSON object
+    public static JSONObject intoJSON(String user, String pass) {
+        JSONObject acc = new JSONObject();
+        acc.put("username", user);
+        acc.put("password", pass);
+        return acc;
+    }
+
+    //write accounts to JSON file
+    public static void writeToJSON(String jsonString, JSONObject acc){
+        JSONArray arr = new JSONArray(jsonString);
+        
+        try {
+            arr = new JSONArray(jsonString);
+        } catch (Exception e) {
+            // if not a valid JSON array, initialize array
+            arr = new JSONArray();
+        }
+
+        arr.put(acc);
+        
+        try(FileWriter fw = new FileWriter("accounts.json")){
+            fw.write(arr.toString());
+            fw.flush();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //method to check duplicate usernames
+    public static boolean checkAcc(String jsonString, String user){
+        if(jsonString.length() > 2){
+            JSONArray arr = new JSONArray(jsonString);
+            for(int i = 0; i < arr.length(); i++){
+                JSONObject acc = arr.getJSONObject(i);
+                if(user.equals(acc.getString("username"))){
+                    return false;
+                }
+                else{
+                    return true;
+                }
+            }
+        }
+        else{
+            return true;
+        }
+        return true;
+    }
+}
+
 class Info extends HBox{
     private Label infoLabel;
     private TextField userInfo;
@@ -30,8 +90,8 @@ class Info extends HBox{
         this.setAlignment(Pos.CENTER);
     }
 
-    public String getUserInfo(){
-        return userInfo.getText();
+    public TextField getUserInfo(){
+        return userInfo;
     }
 }
 
@@ -40,6 +100,7 @@ class CreateBox extends VBox {
     private Info password;
     private Info confirmPass;
 
+    private Label errorMessage;
     private boolean isMatch;
 
     CreateBox(){
@@ -49,12 +110,16 @@ class CreateBox extends VBox {
         password = new Info("Password: ");
         confirmPass = new Info("Confirm Password: ");
 
-        this.getChildren().addAll(username, password, confirmPass);
+        errorMessage = new Label();
+
+        isMatch = false;
+
+        this.getChildren().addAll(username, password, confirmPass, errorMessage);
         this.setAlignment(Pos.CENTER);
     }
 
     public void checkPass(){
-        if(password.getUserInfo() == confirmPass.getUserInfo()){
+        if(password.getUserInfo().getText().equals(confirmPass.getUserInfo().getText())){
             isMatch = true;
         }
         else{
@@ -62,12 +127,20 @@ class CreateBox extends VBox {
         }
     }
 
-    public Info userInfo(){
-        return username;
+    public boolean passMatch(){
+        return isMatch;
     }
 
-    public Info passInfo(){
-        return password;
+    public String userInfo(){
+        return username.getUserInfo().getText();
+    }
+
+    public String passInfo(){
+        return password.getUserInfo().getText();
+    }
+
+    public void setErrorMsg(String prompt){
+        errorMessage.setText(prompt);
     }
 }
 
@@ -116,9 +189,21 @@ class Header extends HBox {
 }
 
 class CreateScreen extends BorderPane {
+    //error messages
+    private static final String RESET = "";
+    private static final String PASS_ERROR = "Passwords do not match";
+    private static final String USER_ERROR = "Username already exists";
+    private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
+
     private CreateBox cBox;
     private Footer footer;
     private Header header;
+
+    private JSONObject acc;
+
+    private String user = "";
+    private String pass = "";
+    private String accounts = "";
 
     private Button checkValidAccButton;
     private Button createAccButton;
@@ -128,25 +213,41 @@ class CreateScreen extends BorderPane {
         footer = new Footer();
         header = new Header();
 
+        acc = new JSONObject();
+
         this.setTop(header);
         this.setCenter(cBox);
         this.setBottom(footer);
 
         checkValidAccButton = footer.getCheckValidAccButton();
         createAccButton = footer.getCreateAccButton();
+        createAccButton.setDisable(true);
 
         addListeners();
     }
 
     public void addListeners(){
+        try {
+            if (!Files.exists(Paths.get("accounts.json"))) {
+                //if file doesn't exist, create file
+                Files.createFile(Paths.get("accounts.json"));
+                accounts = "[]";
+            } else {
+                accounts = new String(Files.readAllBytes(Paths.get("accounts.json")));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         /*
-         *  set to taggled
+         *  set to toggled
          *  write the infomation in a json file
          *  
          */
         createAccButton.setOnAction(e -> {
-            //TODO
+            //write account info to JSON file
+            acc = AccJSON.intoJSON(user, pass);
+            AccJSON.writeToJSON(accounts, acc);
         });
 
         /*
@@ -155,8 +256,26 @@ class CreateScreen extends BorderPane {
          *  Username is not duplicate
          */
         checkValidAccButton.setOnAction(e -> {
-            //TODO
-        });
+            user = cBox.userInfo();
+            pass = cBox.passInfo();
+            cBox.checkPass();
+
+            //if any field is missing, display error
+            if(user.isEmpty() || pass.isEmpty()){
+                cBox.setErrorMsg(EMPTY_FIELD_ERROR);
+            }
+            else if(!cBox.passMatch()){ //passwords don't match error
+                cBox.setErrorMsg(PASS_ERROR);
+            }
+            else if(!AccJSON.checkAcc(accounts, user)){ //duplicate username error
+                cBox.setErrorMsg(USER_ERROR);
+            }
+            else{
+                //if all requirements are met, allow create account
+                cBox.setErrorMsg(RESET);
+                createAccButton.setDisable(false);
+            }
+        });   
     }
 }
 
