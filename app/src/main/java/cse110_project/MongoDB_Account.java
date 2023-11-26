@@ -6,7 +6,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-
+import static com.mongodb.client.model.Filters.*;
 
 public class MongoDB_Account implements MongoDB{
     private String url;
@@ -50,5 +50,23 @@ public class MongoDB_Account implements MongoDB{
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Read'");
     }
-    
+
+    public boolean checkUsername(String username) {
+        try (MongoClient mongoClient = MongoClients.create(url)) {
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username",username)).first();
+            
+            if(account == null){
+                return true;
+            }
+            else{
+                return false;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
 }

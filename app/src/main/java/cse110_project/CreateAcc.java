@@ -185,7 +185,7 @@ class CreateScreen extends BorderPane {
     private static final String PASS_ERROR = "Passwords do not match";
     private static final String USER_ERROR = "Username already exists";
     private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
-    private static final String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
+    private static final String URL = "mongodb+srv://chaup070:dir585Muj@cluster0.c8w0sel.mongodb.net/?retryWrites=true&w=majority";
 
     private CreateBox cBox;
     private Footer footer;
@@ -248,9 +248,9 @@ class CreateScreen extends BorderPane {
             else if(!cBox.passMatch()){ //passwords don't match error
                 cBox.setErrorMsg(PASS_ERROR);
             }
-            // else if(!AccJSON.checkAcc(accounts, user)){ //duplicate username error
-            //     cBox.setErrorMsg(USER_ERROR);
-            // }
+            else if(!mongodb.checkUsername(user)){ //duplicate username error
+                cBox.setErrorMsg(USER_ERROR);
+            }
             else{
                 //if all requirements are met, allow create account
                 //write account info to JSON file
