@@ -63,9 +63,6 @@ class AccJSON {
                 if(user.equals(acc.getString("username"))){
                     return false;
                 }
-                else{
-                    return true;
-                }
             }
         }
         else{
@@ -79,7 +76,7 @@ class AccJSON {
 class Info extends HBox{
     private Label infoLabel;
     private TextField userInfo;
-    
+
     Info(String label){
         infoLabel = new Label(label);
 
