@@ -15,7 +15,6 @@ import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 import org.json.JSONArray;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -186,12 +185,14 @@ class CreateScreen extends BorderPane {
     private static final String PASS_ERROR = "Passwords do not match";
     private static final String USER_ERROR = "Username already exists";
     private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
+    private static final String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
 
     private CreateBox cBox;
     private Footer footer;
     private Header header;
+    private MongoDB_Account mongodb;
 
-    private JSONObject acc;
+    //private JSONObject acc;
 
     private String user = "";
     private String pass = "";
@@ -204,8 +205,9 @@ class CreateScreen extends BorderPane {
         cBox = new CreateBox();
         footer = new Footer();
         header = new Header();
+        mongodb = new MongoDB_Account(URL);
 
-        acc = new JSONObject();
+        //acc = new JSONObject();
 
         this.setTop(header);
         this.setCenter(cBox);
@@ -217,17 +219,17 @@ class CreateScreen extends BorderPane {
     }
 
     public void addListeners(){
-        try {
-            if (!Files.exists(Paths.get("accounts.json"))) {
-                //if file doesn't exist, create file
-                Files.createFile(Paths.get("accounts.json"));
-                accounts = "[]";
-            } else {
-                accounts = new String(Files.readAllBytes(Paths.get("accounts.json")));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // try {
+        //     if (!Files.exists(Paths.get("accounts.json"))) {
+        //         //if file doesn't exist, create file
+        //         Files.createFile(Paths.get("accounts.json"));
+        //         accounts = "[]";
+        //     } else {
+        //         accounts = new String(Files.readAllBytes(Paths.get("accounts.json")));
+        //     }
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        // }
 
         /*
          *  check password and username before create account
@@ -235,7 +237,6 @@ class CreateScreen extends BorderPane {
          *  
          */
         createAccButton.setOnAction(e -> {
-
             user = cBox.userInfo();
             pass = cBox.passInfo();
             cBox.checkPass();
@@ -247,15 +248,16 @@ class CreateScreen extends BorderPane {
             else if(!cBox.passMatch()){ //passwords don't match error
                 cBox.setErrorMsg(PASS_ERROR);
             }
-            else if(!AccJSON.checkAcc(accounts, user)){ //duplicate username error
-                cBox.setErrorMsg(USER_ERROR);
-            }
+            // else if(!AccJSON.checkAcc(accounts, user)){ //duplicate username error
+            //     cBox.setErrorMsg(USER_ERROR);
+            // }
             else{
                 //if all requirements are met, allow create account
                 //write account info to JSON file
                 cBox.setErrorMsg(RESET);
-                acc = AccJSON.intoJSON(user, pass);
-                AccJSON.writeToJSON(accounts, acc);
+                mongodb.Create(user, pass);
+                // acc = AccJSON.intoJSON(user, pass);
+                // AccJSON.writeToJSON(accounts, acc);
             }
         });  
     }

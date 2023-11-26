@@ -1,15 +1,12 @@
 package cse110_project;
 
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-
 interface MongoDB {
+
+    void Create(String username, String password);
     
-    void Delete(MangoCollection<Document> collection);
+    void Delete();
 
-    void Update(MangoCollection<Document> collection);
+    void Update();
 
-    void Read(MangoCollection<Document> collection);
+    void Read();
 }

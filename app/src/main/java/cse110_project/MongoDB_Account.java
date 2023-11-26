@@ -11,37 +11,25 @@ import org.bson.types.ObjectId;
 public class MongoDB_Account implements MongoDB{
     private String url;
 
-    private String username;
-    private String password;
-
     private MongoDatabase UserAccountDB;
     public MongoCollection<Document> accountsCollection;
 
-    public MongoDB_Account(String url, String username, String password){
+    public MongoDB_Account(String url){
         this.url = url;
-        this.username = username;
-        this.password = password;
-
-        try (MongoClient mongoClient = MongoClients.create(uri)) {
-            UserAccountDB = mongoClient.create("user_account");
-            accountsCollection = UserAccountDB.getCollection("accounts");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
     @Override
-    public void Create() {
-        Document account = new Document("_id", new ObjectId());
-        account.append("account_id", 10d)
-            .append("username", username)
-            .append("password", password);
-
-        if(account != null){
-            System.out.println(account.toJson());
+    public void Create(String username, String password) {
+        try (MongoClient mongoClient = MongoClients.create(url)) {
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = new Document("_id", new ObjectId());
+            account.append("account_id", 10d)
+                .append("username", username)
+                .append("password", password);
+            
             accountsCollection.insertOne(account);
-            System.out.println("Success");
-        }else{
-            System.out.println("Failed");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
