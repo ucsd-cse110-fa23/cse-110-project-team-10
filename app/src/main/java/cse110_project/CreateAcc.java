@@ -11,11 +11,11 @@ import javafx.scene.layout.*;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.TextAlignment;
 import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 import org.json.JSONArray;
 import java.nio.file.Paths;
 import java.nio.file.Files;
@@ -74,6 +74,7 @@ class AccJSON {
         return true;
     }
 }
+
 
 class Info extends HBox{
     private Label infoLabel;
