@@ -44,7 +44,7 @@ class AccJSON {
         }
 
         arr.put(acc);
-        
+
         try(FileWriter fw = new FileWriter("accounts.json")){
             fw.write(arr.toString());
             fw.flush();
@@ -78,6 +78,7 @@ class AccJSON {
 class Info extends HBox{
     private Label infoLabel;
     private TextField userInfo;
+    
     Info(String label){
         infoLabel = new Label(label);
 
@@ -111,6 +112,7 @@ class CreateBox extends VBox {
         confirmPass = new Info("Confirm Password: ");
 
         errorMessage = new Label();
+        errorMessage.setStyle("-fx-text-fill: red");
 
         isMatch = false;
 
@@ -146,7 +148,6 @@ class CreateBox extends VBox {
 
 class Footer extends HBox {
 
-    private Button checkValidAccButton;
     private Button createAccButton;
 
     Footer(){
@@ -156,18 +157,11 @@ class Footer extends HBox {
         this.setStyle("-fx-background-color: #F0F8FF;");
         this.setSpacing(10);
 
-        checkValidAccButton = new Button("Check Valid");
-        checkValidAccButton.setStyle(defaultButtonStyle);
-
         createAccButton = new Button("Create Account");
         createAccButton.setStyle(defaultButtonStyle);
 
-        this.getChildren().addAll(checkValidAccButton, createAccButton);
+        this.getChildren().addAll(createAccButton);
         this.setAlignment(Pos.CENTER);
-    }
-
-    public Button getCheckValidAccButton() {
-        return checkValidAccButton;
     }
 
     public Button getCreateAccButton() {
@@ -219,9 +213,7 @@ class CreateScreen extends BorderPane {
         this.setCenter(cBox);
         this.setBottom(footer);
 
-        checkValidAccButton = footer.getCheckValidAccButton();
         createAccButton = footer.getCreateAccButton();
-        createAccButton.setDisable(true);
 
         addListeners();
     }
@@ -240,22 +232,12 @@ class CreateScreen extends BorderPane {
         }
 
         /*
-         *  set to toggled
+         *  check password and username before create account
          *  write the infomation in a json file
          *  
          */
         createAccButton.setOnAction(e -> {
-            //write account info to JSON file
-            acc = AccJSON.intoJSON(user, pass);
-            AccJSON.writeToJSON(accounts, acc);
-        });
 
-        /*
-         * Check two things:
-         *  Confirm pass is the same as pass
-         *  Username is not duplicate
-         */
-        checkValidAccButton.setOnAction(e -> {
             user = cBox.userInfo();
             pass = cBox.passInfo();
             cBox.checkPass();
@@ -272,10 +254,12 @@ class CreateScreen extends BorderPane {
             }
             else{
                 //if all requirements are met, allow create account
+                //write account info to JSON file
                 cBox.setErrorMsg(RESET);
-                createAccButton.setDisable(false);
+                acc = AccJSON.intoJSON(user, pass);
+                AccJSON.writeToJSON(accounts, acc);
             }
-        });   
+        });  
     }
 }
 
