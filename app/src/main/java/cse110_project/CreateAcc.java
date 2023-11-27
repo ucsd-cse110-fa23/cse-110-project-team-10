@@ -256,7 +256,7 @@ class CreateScreen extends BorderPane {
                 //if all requirements are met, allow create account
                 //write account info to JSON file
                 cBox.setErrorMsg(RESET);
-                mongodb.Create(user, pass);
+                mongodb.CreateAccount(user, pass);
                 // acc = AccJSON.intoJSON(user, pass);
                 // AccJSON.writeToJSON(accounts, acc);
             }

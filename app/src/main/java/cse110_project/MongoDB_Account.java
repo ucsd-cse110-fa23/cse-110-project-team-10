@@ -52,7 +52,7 @@ public class MongoDB_Account implements MongoDB{
 
     //For login
     @Override
-    public void Read(String username) {
+    public void LookUpAccount(String username) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Read'");
     }

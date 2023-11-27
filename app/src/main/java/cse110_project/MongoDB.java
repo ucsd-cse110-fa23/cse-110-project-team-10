@@ -7,5 +7,5 @@ interface MongoDB {
 
     void Update(String username);
 
-    void Read(String username);
+    void LookUpAccount(String username);
 }
