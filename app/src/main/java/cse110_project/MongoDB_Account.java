@@ -17,8 +17,10 @@ public class MongoDB_Account implements MongoDB{
     public MongoDB_Account(String url){
         this.url = url;
     }
+
+    //Create user account
     @Override
-    public void Create(String username, String password) {
+    public void CreateAccount(String username, String password) {
         try (MongoClient mongoClient = MongoClients.create(url)) {
             UserAccountDB = mongoClient.getDatabase("user_account");
             accountsCollection = UserAccountDB.getCollection("accounts");
@@ -33,20 +35,24 @@ public class MongoDB_Account implements MongoDB{
         }
     }
 
+    //delete recipe
     @Override
-    public void Delete() {
+    public void Delete(String username) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Delete'");
     }
 
+    //Update recipe
     @Override
-    public void Update() {
+    public void Update(String username) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Update'");
     }
 
+
+    //For login
     @Override
-    public void Read() {
+    public void Read(String username) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'Read'");
     }

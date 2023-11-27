@@ -22,54 +22,54 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-class AccJSON {
-    //create account JSON object
-    public static JSONObject intoJSON(String user, String pass) {
-        JSONObject acc = new JSONObject();
-        acc.put("username", user);
-        acc.put("password", pass);
-        return acc;
-    }
+// class AccJSON {
+//     //create account JSON object
+//     public static JSONObject intoJSON(String user, String pass) {
+//         JSONObject acc = new JSONObject();
+//         acc.put("username", user);
+//         acc.put("password", pass);
+//         return acc;
+//     }
 
-    //write accounts to JSON file
-    public static void writeToJSON(String jsonString, JSONObject acc){
-        JSONArray arr = new JSONArray(jsonString);
+//     //write accounts to JSON file
+//     public static void writeToJSON(String jsonString, JSONObject acc){
+//         JSONArray arr = new JSONArray(jsonString);
         
-        try {
-            arr = new JSONArray(jsonString);
-        } catch (Exception e) {
-            // if not a valid JSON array, initialize array
-            arr = new JSONArray();
-        }
+//         try {
+//             arr = new JSONArray(jsonString);
+//         } catch (Exception e) {
+//             // if not a valid JSON array, initialize array
+//             arr = new JSONArray();
+//         }
 
-        arr.put(acc);
+//         arr.put(acc);
 
-        try(FileWriter fw = new FileWriter("accounts.json")){
-            fw.write(arr.toString());
-            fw.flush();
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//         try(FileWriter fw = new FileWriter("accounts.json")){
+//             fw.write(arr.toString());
+//             fw.flush();
+//             fw.close();
+//         } catch (IOException e) {
+//             e.printStackTrace();
+//         }
+//     }
 
-    //method to check duplicate usernames
-    public static boolean checkAcc(String jsonString, String user){
-        if(jsonString.length() > 2){
-            JSONArray arr = new JSONArray(jsonString);
-            for(int i = 0; i < arr.length(); i++){
-                JSONObject acc = arr.getJSONObject(i);
-                if(user.equals(acc.getString("username"))){
-                    return false;
-                }
-            }
-        }
-        else{
-            return true;
-        }
-        return true;
-    }
-}
+//     //method to check duplicate usernames
+//     public static boolean checkAcc(String jsonString, String user){
+//         if(jsonString.length() > 2){
+//             JSONArray arr = new JSONArray(jsonString);
+//             for(int i = 0; i < arr.length(); i++){
+//                 JSONObject acc = arr.getJSONObject(i);
+//                 if(user.equals(acc.getString("username"))){
+//                     return false;
+//                 }
+//             }
+//         }
+//         else{
+//             return true;
+//         }
+//         return true;
+//     }
+// }
 
 
 class Info extends HBox{
@@ -102,6 +102,7 @@ class CreateBox extends VBox {
     private boolean isMatch;
 
     CreateBox(){
+        this.setStyle("-fx-background-color: #F0F8FF;");
         this.setSpacing(5);
 
         username = new Info("Username: ");
@@ -185,7 +186,7 @@ class CreateScreen extends BorderPane {
     private static final String PASS_ERROR = "Passwords do not match";
     private static final String USER_ERROR = "Username already exists";
     private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
-    private static final String URL = "mongodb+srv://chaup070:dir585Muj@cluster0.c8w0sel.mongodb.net/?retryWrites=true&w=majority";
+    private static final String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
 
     private CreateBox cBox;
     private Footer footer;

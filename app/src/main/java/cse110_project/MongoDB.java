@@ -1,12 +1,11 @@
 package cse110_project;
 
 interface MongoDB {
+    void CreateAccount(String username, String password);
 
-    void Create(String username, String password);
-    
-    void Delete();
+    void Delete(String username);
 
-    void Update();
+    void Update(String username);
 
-    void Read();
+    void Read(String username);
 }
