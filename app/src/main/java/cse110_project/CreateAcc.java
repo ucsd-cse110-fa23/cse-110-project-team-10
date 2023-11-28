@@ -92,6 +92,19 @@ class CreateBox extends VBox {
     }
 }
 
+class Header extends HBox {
+
+    Header() {
+        this.setPrefSize(500, 60); // Size of the header
+        this.setStyle("-fx-background-color: #F0F8FF;");
+        this.setPadding(new Insets(100,0,0,0));
+        Text titleText = new Text("PantryPal 2"); // Text of the Header
+        titleText.setStyle("-fx-font-weight: bold; -fx-font-size: 45;");
+        this.getChildren().add(titleText);
+        this.setAlignment(Pos.CENTER); // Align the text to the Center
+    }
+}
+
 class Footer extends HBox {
 
     private Button createAccButton;
@@ -122,7 +135,7 @@ class Footer extends HBox {
     }
 }
 
-public class CreateAccScreen extends BorderPane {
+class CreateAccScreen extends BorderPane {
     //error messages
     private static final String RESET = "";
     private static final String PASS_ERROR = "Passwords do not match";
@@ -132,6 +145,7 @@ public class CreateAccScreen extends BorderPane {
 
     private CreateBox cBox;
     private Footer footer;
+    private Header header;
     private MongoDB_Account mongodb;
 
     private String user = "";
@@ -144,10 +158,12 @@ public class CreateAccScreen extends BorderPane {
     public CreateAccScreen(){
         cBox = new CreateBox();
         footer = new Footer();
+        header = new Header();
         mongodb = new MongoDB_Account(URL);
 
         this.setCenter(cBox);
         this.setBottom(footer);
+        this.setTop(header);
 
         createAccButton = footer.getCreateAccButton();
         backButton = footer.getBackButton();
@@ -196,21 +212,21 @@ public class CreateAccScreen extends BorderPane {
 
 
 
-// public class CreateAcc extends Application {
-//     public static void main(String[] args) {
-//         launch(args);
-//     }
+public class CreateAcc extends Application {
+    public static void main(String[] args) {
+        launch(args);
+    }
 
-//     @Override
-//     public void start(Stage primaryStage) {
+    @Override
+    public void start(Stage primaryStage) {
 
-//         CreateScreen root = new CreateScreen();
+        CreateAccScreen root = new CreateAccScreen();
 
-//         Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 800, 600);
 
-//         primaryStage.setTitle("Create Account");
-//         primaryStage.setScene(scene);
-//         primaryStage.setResizable(false);
-//         primaryStage.show();
-//     }
-// }
+        primaryStage.setTitle("Create Account");
+        primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
+        primaryStage.show();
+    }
+}
