@@ -14,63 +14,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
-import org.json.JSONObject;
-import org.json.JSONArray;
+import cse110_project.LoginScreen;
+
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
-// class AccJSON {
-//     //create account JSON object
-//     public static JSONObject intoJSON(String user, String pass) {
-//         JSONObject acc = new JSONObject();
-//         acc.put("username", user);
-//         acc.put("password", pass);
-//         return acc;
-//     }
-
-//     //write accounts to JSON file
-//     public static void writeToJSON(String jsonString, JSONObject acc){
-//         JSONArray arr = new JSONArray(jsonString);
-        
-//         try {
-//             arr = new JSONArray(jsonString);
-//         } catch (Exception e) {
-//             // if not a valid JSON array, initialize array
-//             arr = new JSONArray();
-//         }
-
-//         arr.put(acc);
-
-//         try(FileWriter fw = new FileWriter("accounts.json")){
-//             fw.write(arr.toString());
-//             fw.flush();
-//             fw.close();
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-//     }
-
-//     //method to check duplicate usernames
-//     public static boolean checkAcc(String jsonString, String user){
-//         if(jsonString.length() > 2){
-//             JSONArray arr = new JSONArray(jsonString);
-//             for(int i = 0; i < arr.length(); i++){
-//                 JSONObject acc = arr.getJSONObject(i);
-//                 if(user.equals(acc.getString("username"))){
-//                     return false;
-//                 }
-//             }
-//         }
-//         else{
-//             return true;
-//         }
-//         return true;
-//     }
-// }
-
 
 class Info extends HBox{
     private Label infoLabel;
@@ -147,40 +97,34 @@ class CreateBox extends VBox {
 class Footer extends HBox {
 
     private Button createAccButton;
+    private Button backButton;
 
     Footer(){
         String defaultButtonStyle = "-fx-font-style: italic; -fx-background-color: #FFFFFF;  -fx-font-weight: bold; -fx-font: 11 arial;";
 
         this.setPrefSize(500, 60);
+        this.setPadding(new Insets(0,0,100,0));
         this.setStyle("-fx-background-color: #F0F8FF;");
         this.setSpacing(10);
 
-        createAccButton = new Button("Create Account");
+        createAccButton = new Button("Sign Up");
         createAccButton.setStyle(defaultButtonStyle);
+        backButton = new Button("Sign In");
 
-        this.getChildren().addAll(createAccButton);
+        this.getChildren().addAll(createAccButton, backButton);
         this.setAlignment(Pos.CENTER);
     }
 
     public Button getCreateAccButton() {
         return createAccButton;
     }
-}
 
-class Header extends HBox {
-
-    Header() {
-        this.setPrefSize(500, 60); // Size of the header
-        this.setStyle("-fx-background-color: #F0F8FF;");
-        this.setPadding(new Insets(100,0,0,0));
-        Text titleText = new Text("PantryPal 2"); // Text of the Header
-        titleText.setStyle("-fx-font-weight: bold; -fx-font-size: 45;");
-        this.getChildren().add(titleText);
-        this.setAlignment(Pos.CENTER); // Align the text to the Center
+    public Button getBackButton(){
+        return backButton;
     }
 }
 
-class CreateScreen extends BorderPane {
+public class CreateAccScreen extends BorderPane {
     //error messages
     private static final String RESET = "";
     private static final String PASS_ERROR = "Passwords do not match";
@@ -190,53 +134,40 @@ class CreateScreen extends BorderPane {
 
     private CreateBox cBox;
     private Footer footer;
-    private Header header;
     private MongoDB_Account mongodb;
-
-    //private JSONObject acc;
+    private LoginScreen login;
 
     private String user = "";
     private String pass = "";
     private String accounts = "";
 
-    private Button checkValidAccButton;
     private Button createAccButton;
+    private Button backButton;
 
-    CreateScreen(){
+    public CreateAccScreen(LoginScreen LoginScreen){
+        login = LoginScreen;
         cBox = new CreateBox();
         footer = new Footer();
-        header = new Header();
         mongodb = new MongoDB_Account(URL);
 
-        //acc = new JSONObject();
-
-        this.setTop(header);
         this.setCenter(cBox);
         this.setBottom(footer);
 
         createAccButton = footer.getCreateAccButton();
+        backButton = footer.getBackButton();
 
         addListeners();
     }
 
-    public void addListeners(){
-        // try {
-        //     if (!Files.exists(Paths.get("accounts.json"))) {
-        //         //if file doesn't exist, create file
-        //         Files.createFile(Paths.get("accounts.json"));
-        //         accounts = "[]";
-        //     } else {
-        //         accounts = new String(Files.readAllBytes(Paths.get("accounts.json")));
-        //     }
-        // } catch (IOException e) {
-        //     e.printStackTrace();
-        // }
+    public Footer getFooter(){
+        return footer;
+    }
 
-        /*
-         *  check password and username before create account
-         *  write the infomation in a json file
-         *  
-         */
+    public CreateBox getCreateBox(){
+        return cBox;
+    }
+
+    public void addListeners(){
         createAccButton.setOnAction(e -> {
             user = cBox.userInfo();
             pass = cBox.passInfo();
@@ -257,28 +188,33 @@ class CreateScreen extends BorderPane {
                 //write account info to JSON file
                 cBox.setErrorMsg(RESET);
                 mongodb.CreateAccount(user, pass);
-                // acc = AccJSON.intoJSON(user, pass);
-                // AccJSON.writeToJSON(accounts, acc);
             }
-        });  
+        });
+        
+        backButton.setOnAction(e -> {
+            login.setCenter(login.getLoginBox());
+            login.setBottom(login.getFooter());
+        });
     }
 }
 
-public class CreateAcc extends Application {
-    public static void main(String[] args) {
-        launch(args);
-    }
 
-    @Override
-    public void start(Stage primaryStage) {
 
-        CreateScreen root = new CreateScreen();
+// public class CreateAcc extends Application {
+//     public static void main(String[] args) {
+//         launch(args);
+//     }
 
-        Scene scene = new Scene(root, 800, 600);
+//     @Override
+//     public void start(Stage primaryStage) {
 
-        primaryStage.setTitle("Create Account");
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.show();
-    }
-}
+//         CreateScreen root = new CreateScreen();
+
+//         Scene scene = new Scene(root, 800, 600);
+
+//         primaryStage.setTitle("Create Account");
+//         primaryStage.setScene(scene);
+//         primaryStage.setResizable(false);
+//         primaryStage.show();
+//     }
+// }

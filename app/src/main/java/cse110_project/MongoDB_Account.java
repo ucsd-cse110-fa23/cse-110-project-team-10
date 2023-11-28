@@ -8,7 +8,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.*;
 
-public class MongoDB_Account implements MongoDB{
+public class MongoDB_Account{
     private String url;
 
     private MongoDatabase UserAccountDB;
@@ -19,7 +19,6 @@ public class MongoDB_Account implements MongoDB{
     }
 
     //Create user account
-    @Override
     public void CreateAccount(String username, String password) {
         try (MongoClient mongoClient = MongoClients.create(url)) {
             UserAccountDB = mongoClient.getDatabase("user_account");
@@ -35,26 +34,26 @@ public class MongoDB_Account implements MongoDB{
         }
     }
 
-    //delete recipe
-    @Override
-    public void Delete(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'Delete'");
-    }
-
-    //Update recipe
-    @Override
-    public void Update(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'Update'");
-    }
-
-
     //For login
-    @Override
-    public void LookUpAccount(String username) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'Read'");
+    public boolean LookUpAccount(String username, String password) {
+        try (MongoClient mongoClient = MongoClients.create(url)) {
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username",username)).first();
+            
+            if(account == null){
+                return false;
+            }
+            else{
+                if(password.equals(account.getString("password"))){
+                    return true;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public boolean checkUsername(String username) {
