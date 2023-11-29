@@ -57,15 +57,12 @@ public class MongoDB_Test{
             accountsCollection = UserAccountDB.getCollection("test");
             Document account = accountsCollection.find(eq("username",username)).first();
 
-            System.out.println("connect successful");
             
             if(account == null){
-                System.out.println("Hi");
                 return false;
             }
             else{
                 if(password.equals(account.getString("password"))){
-                    System.out.println("Hello");
                     return true;
                 }
             }
@@ -73,7 +70,6 @@ public class MongoDB_Test{
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("connect unsuccessful");
         return false;
     }
 
