@@ -24,7 +24,7 @@ public class E2ETest {
     }
 
     /**
-     * Integration test for create account and login
+     * Integration test for create account and login.
      */
     @Test
     public void createAccAndLoginTest() throws Exception {
