@@ -22,7 +22,7 @@ public class CreateAccTest {
     }
 
     /**
-     * Test for username's availability before create account
+     * Test for username's availability before create account.
      */
     @Test
     public void checkUsernameBeforeCreateTest() throws Exception {
