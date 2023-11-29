@@ -4,14 +4,9 @@
 package cse110_project;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 import org.json.JSONObject;
-import java.util.Collections;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -196,6 +191,7 @@ class newScreen extends VBox {
     private static final String RESPONSE = "Your response is: ";
     private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
+    private static final String ERROR_PROMPT = "Sentence doesn't contain mealtype, please retry!";
 
     private Prompt mealPrompt;
     private Prompt ingredientPrompt;
@@ -253,7 +249,23 @@ class newScreen extends VBox {
                 else {
                     aRecord.stopRecording();
                     mealType = getVoiceInput();
-                    mealPrompt.setLabel(RESPONSE + mealType);
+                    //checking if user mention any of the mealtype
+                    if(mealType.toLowerCase().contains("breakfast")){
+                        mealType = "breakfast";
+                    }else if(mealType.toLowerCase().contains("lunch")){
+                        mealType = "lunch";
+                    }else if(mealType.toLowerCase().contains("dinner")){
+                        mealType = "dinner";
+                    }else{
+                        mealType = "";
+                    }
+
+                    if(mealType != ""){
+                        mealPrompt.setLabel(RESPONSE + mealType);
+                    }else{
+                        mealPrompt.setLabel(ERROR_PROMPT);
+                    }
+                    
                     // Prompt user to input ingredient list after finish recording meal type
                     ingredientPrompt.setLabel(INGREDIENT_PROMPT);
                     if (mealType != "" && mealList != "") {
