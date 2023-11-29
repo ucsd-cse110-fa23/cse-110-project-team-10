@@ -11,7 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 public class CreateAccTest {
     String testUser;
     String testPass;
-    String URL = "mongodb+srv://chaup070:dir585Muj@cluster0.c8w0sel.mongodb.net/?retryWrites=true&w=majority";
+    String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
     MongoDB_Test testMongodb;
 
     @BeforeEach
@@ -19,6 +19,9 @@ public class CreateAccTest {
         testUser = "test";
         testPass = "test";
         testMongodb = new MongoDB_Test(URL);
+
+        //if account exists, delete before testing
+        testMongodb.Delete(testUser);
     }
 
     /**
