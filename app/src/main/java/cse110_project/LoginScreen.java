@@ -12,6 +12,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.geometry.Insets;
 import javafx.scene.text.*;
+import javafx.scene.control.CheckBox;
 
 import cse110_project.CreateAccScreen;
 
@@ -94,6 +95,7 @@ class LoginBox extends VBox {
 
     private Label errorMessage;
     private boolean isMatch;
+    private CheckBox autoLoginBox;
 
     LoginBox(){
         this.setStyle("-fx-background-color: #F0F8FF;");
@@ -105,9 +107,12 @@ class LoginBox extends VBox {
         errorMessage = new Label();
         errorMessage.setStyle("-fx-text-fill: red");
 
+        autoLoginBox = new CheckBox("Automatic Login");
+        autoLoginBox.setIndeterminate(false);
+
         isMatch = false;
 
-        this.getChildren().addAll(username, password, errorMessage);
+        this.getChildren().addAll(username, password, errorMessage, autoLoginBox);
         this.setAlignment(Pos.CENTER);
     }
 
@@ -126,12 +131,49 @@ class LoginBox extends VBox {
     public void setErrorMsg(String prompt){
         errorMessage.setText(prompt);
     }
+
+    public CheckBox getAutoLoginBox(){
+        return autoLoginBox;
+    }
+
+    //saves account info
+    public void saveAutoLoginInfo(){
+        try {
+            FileWriter fw = new FileWriter("account.csv");
+
+            fw.write(userInfo() + "," + passInfo());
+            fw.close();
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    //retrieves account info
+    public void loadLoginInfo(){
+        try{
+            FileReader file = new FileReader("account.csv");
+            BufferedReader br = new BufferedReader(file);
+
+            while(br.ready()){
+                String acc = br.readLine();
+                username.getUserInfo().setText(acc.substring(0, acc.indexOf(",")));
+                password.getUserInfo().setText(acc.substring(acc.indexOf(",") + 1));
+            }
+            
+            br.close();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
 }
 
 public class LoginScreen extends BorderPane {
     private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
     private static final String ACC_ERROR = "Invalid Username or Password";
-    private static final String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
+    private static final String URL = "mongodb+srv://chaup070:dir585Muj@cluster0.c8w0sel.mongodb.net/?retryWrites=true&w=majority";
 
     private String user = "";
     private String pass = "";
@@ -146,6 +188,7 @@ public class LoginScreen extends BorderPane {
 
     private Button createAccButton;
     private Button loginButton;
+    private CheckBox autoLoginBox;
 
     //view
     public LoginScreen(App app){
@@ -155,7 +198,7 @@ public class LoginScreen extends BorderPane {
         mongodb = new MongoDB_Account(URL);
         this.app = app;
 
-
+        autoLoginBox = lbox.getAutoLoginBox();
         createAccButton = footer.getCreateAccButton();
         loginButton = footer.getLoginButton();
 
@@ -191,9 +234,28 @@ public class LoginScreen extends BorderPane {
             }
             else if(!mongodb.LookUpAccount(user, pass)){ //check password
                 lbox.setErrorMsg(ACC_ERROR);
-            }else{
+            }
+            else{
+                if(autoLoginBox.isSelected()){
+                    lbox.saveAutoLoginInfo();
+                }
                 app.transitionToMainScreen();
             }
         });
+
+        autoLoginBox.setOnAction(e -> {
+            autoLoginBox.setSelected(true);
+        });
+    }
+
+    public void autoLogin(){
+        if(new File("account.csv").isFile()){
+            lbox.loadLoginInfo();
+            user = lbox.userInfo();
+            pass = lbox.passInfo();
+            if(mongodb.LookUpAccount(user,pass)){
+                app.transitionToMainScreen();
+            }
+        }
     }
 }

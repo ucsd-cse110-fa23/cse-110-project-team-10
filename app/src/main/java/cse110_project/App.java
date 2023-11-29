@@ -523,6 +523,7 @@ public class App extends Application {
         Scene scene = new Scene(login, 800, 600);
         primaryStage.setScene(scene);
         primaryStage.show();
+        login.autoLogin();
     }
 
     @Override
