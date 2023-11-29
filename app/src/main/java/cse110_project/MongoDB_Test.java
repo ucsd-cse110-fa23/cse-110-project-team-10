@@ -12,7 +12,7 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonWriterSettings;
 import static com.mongodb.client.model.Filters.*;
 
-public class MongoDB_Test implements MongoDB{
+public class MongoDB_Test{
 
     private String url;
 
@@ -51,8 +51,28 @@ public class MongoDB_Test implements MongoDB{
         }
     }
 
+    public boolean LookUpAccount(String username, String password) {
+        try (MongoClient mongoClient = MongoClients.create(url)) {
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("test");
+            Document account = accountsCollection.find(eq("username",username)).first();
+
+            
+            if(account == null){
+                return false;
+            }
+            else{
+                if(password.equals(account.getString("password"))){
+                    return true;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public void Update(String username) {}
-    public void LookUpAccount(String username){}
 
     public boolean checkUsername(String username) {
         try (MongoClient mongoClient = MongoClients.create(url)) {

@@ -14,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
+import cse110_project.LoginScreen;
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.*;
@@ -93,7 +94,6 @@ class CreateBox extends VBox {
 }
 
 class Header extends HBox {
-
     Header() {
         this.setPrefSize(500, 60); // Size of the header
         this.setStyle("-fx-background-color: #F0F8FF;");
@@ -135,7 +135,7 @@ class Footer extends HBox {
     }
 }
 
-class CreateAccScreen extends BorderPane {
+public class CreateAccScreen extends BorderPane {
     //error messages
     private static final String RESET = "";
     private static final String PASS_ERROR = "Passwords do not match";
@@ -145,8 +145,8 @@ class CreateAccScreen extends BorderPane {
 
     private CreateBox cBox;
     private Footer footer;
-    private Header header;
     private MongoDB_Account mongodb;
+    private LoginScreen login;
 
     private String user = "";
     private String pass = "";
@@ -155,15 +155,15 @@ class CreateAccScreen extends BorderPane {
     private Button createAccButton;
     private Button backButton;
 
-    public CreateAccScreen(){
+    public CreateAccScreen(LoginScreen LoginScreen){
+        login = LoginScreen;
+
         cBox = new CreateBox();
         footer = new Footer();
-        header = new Header();
         mongodb = new MongoDB_Account(URL);
 
         this.setCenter(cBox);
         this.setBottom(footer);
-        this.setTop(header);
 
         createAccButton = footer.getCreateAccButton();
         backButton = footer.getBackButton();
@@ -204,29 +204,8 @@ class CreateAccScreen extends BorderPane {
         });
         
         backButton.setOnAction(e -> {
-            //TODO
-            //GO BACK TO LOGIN PAGE
+            login.setCenter(login.getLoginBox());
+            login.setBottom(login.getFooter());
         });
-    }
-}
-
-
-
-public class CreateAcc extends Application {
-    public static void main(String[] args) {
-        launch(args);
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
-
-        CreateAccScreen root = new CreateAccScreen();
-
-        Scene scene = new Scene(root, 800, 600);
-
-        primaryStage.setTitle("Create Account");
-        primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
-        primaryStage.show();
     }
 }
