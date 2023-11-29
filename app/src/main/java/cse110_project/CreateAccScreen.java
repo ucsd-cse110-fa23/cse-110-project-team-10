@@ -15,7 +15,6 @@ import javafx.geometry.Insets;
 import javafx.scene.text.*;
 
 import cse110_project.LoginScreen;
-
 import java.nio.file.Paths;
 import java.nio.file.Files;
 import java.io.*;
@@ -94,6 +93,18 @@ class CreateBox extends VBox {
     }
 }
 
+class Header extends HBox {
+    Header() {
+        this.setPrefSize(500, 60); // Size of the header
+        this.setStyle("-fx-background-color: #F0F8FF;");
+        this.setPadding(new Insets(100,0,0,0));
+        Text titleText = new Text("PantryPal 2"); // Text of the Header
+        titleText.setStyle("-fx-font-weight: bold; -fx-font-size: 45;");
+        this.getChildren().add(titleText);
+        this.setAlignment(Pos.CENTER); // Align the text to the Center
+    }
+}
+
 class Footer extends HBox {
 
     private Button createAccButton;
@@ -146,6 +157,7 @@ public class CreateAccScreen extends BorderPane {
 
     public CreateAccScreen(LoginScreen LoginScreen){
         login = LoginScreen;
+
         cBox = new CreateBox();
         footer = new Footer();
         mongodb = new MongoDB_Account(URL);
@@ -197,24 +209,3 @@ public class CreateAccScreen extends BorderPane {
         });
     }
 }
-
-
-
-// public class CreateAcc extends Application {
-//     public static void main(String[] args) {
-//         launch(args);
-//     }
-
-//     @Override
-//     public void start(Stage primaryStage) {
-
-//         CreateScreen root = new CreateScreen();
-
-//         Scene scene = new Scene(root, 800, 600);
-
-//         primaryStage.setTitle("Create Account");
-//         primaryStage.setScene(scene);
-//         primaryStage.setResizable(false);
-//         primaryStage.show();
-//     }
-// }

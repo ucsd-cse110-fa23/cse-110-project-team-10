@@ -173,7 +173,7 @@ class LoginBox extends VBox {
 public class LoginScreen extends BorderPane {
     private static final String EMPTY_FIELD_ERROR = "Please enter the missing information";
     private static final String ACC_ERROR = "Invalid Username or Password";
-    private static final String URL = "mongodb+srv://chaup070:dir585Muj@cluster0.c8w0sel.mongodb.net/?retryWrites=true&w=majority";
+    private static final String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
 
     private String user = "";
     private String pass = "";

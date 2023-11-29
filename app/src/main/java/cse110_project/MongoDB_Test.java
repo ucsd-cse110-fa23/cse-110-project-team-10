@@ -72,6 +72,7 @@ public class MongoDB_Test{
         }
         return false;
     }
+    public void Update(String username) {}
 
     public boolean checkUsername(String username) {
         try (MongoClient mongoClient = MongoClients.create(url)) {
