@@ -16,8 +16,10 @@ import java.net.URL;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextArea;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -25,6 +27,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
+
 import java.nio.file.Paths;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.VBox;
@@ -489,45 +493,65 @@ public class App extends Application {
     private RecipeKind rKind;
     private Server server = new Server();
 
-    public void updateFromServerState() {
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            // Create the request object
-            HttpRequest request = HttpRequest
-                    .newBuilder()
-                    .uri(new URI(App.serverURL + "/recipestate"))
-                    .header("Content-Type", "application/json")
-                    .GET().build();
-            // Send the request and receive the response
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = response.body();
-            state = JSONOperations.fromJSONString(responseBody);
+    public void thereWasAServerError() {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setTitle("Failed to connect to the server");
+        alert.setHeaderText("Failed to connect to the server");
+        alert.setContentText(
+                "The server could be down, your internet might be broken, or there may be a solar flare ravaging civilization.");
+        alert.showAndWait();
+    }
 
-            for (Recipe r : state.getRecipes()) {
-                addRecipeUI(r);
+    public void updateFromServerState() {
+        boolean succeeded = false;
+        while (!succeeded) {
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                // Create the request object
+                HttpRequest request = HttpRequest
+                        .newBuilder()
+                        .uri(new URI(App.serverURL + "/recipestate"))
+                        .header("Content-Type", "application/json")
+                        .GET().build();
+                // Send the request and receive the response
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                String responseBody = response.body();
+                state = JSONOperations.fromJSONString(responseBody);
+
+                for (Recipe r : state.getRecipes()) {
+                    addRecipeUI(r);
+                }
+
+                succeeded = true;
+            } catch (Exception e) {
+                System.err.println("Failed to update from remote state");
+                thereWasAServerError();
+                state = new RecipeStateManager();
             }
-        } catch (Exception e) {
-            System.err.println("Failed to update from remote state");
-            e.printStackTrace();
-            state = new RecipeStateManager();
         }
     }
 
     public void writeServerState() {
-        String toSend = JSONOperations.intoJSONString(state);
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            // Create the request object
-            HttpRequest request = HttpRequest
-                    .newBuilder()
-                    .uri(new URI(App.serverURL + "/recipestate"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
-            // Send the request and receive the response
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            System.err.println("Failed to save remote state");
-            e.printStackTrace();
+        boolean succeeded = false;
+        while(!succeeded) {
+            String toSend = JSONOperations.intoJSONString(state);
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                // Create the request object
+                HttpRequest request = HttpRequest
+                        .newBuilder()
+                        .uri(new URI(App.serverURL + "/recipestate"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+                // Send the request and receive the response
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                succeeded = true;
+            } catch (Exception e) {
+                System.err.println("Failed to save remote state");
+                // e.printStackTrace();
+            }
         }
     }
 
