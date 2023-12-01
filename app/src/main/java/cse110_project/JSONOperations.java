@@ -28,10 +28,13 @@ public class JSONOperations {
         }
         cr.put("recipes", asObjects);
 
+        System.out.println("Cr: " + cr.toString());
+
         return cr.toString();
     }
 
     public static RecipeStateManager fromJSONString(String jsonString) {
+        System.out.println(jsonString);
         RecipeStateManager ret = new RecipeStateManager();
         JSONObject rootObject = new JSONObject(jsonString);
         JSONArray arr = rootObject.getJSONArray("recipes");
@@ -40,8 +43,6 @@ public class JSONOperations {
             Recipe recipe = fromJSON(recipeJSON);
             ret.addRecipe(recipe);
         }
-        // Recipe recipe = fromJSON(rootObject);
-        // ret.addRecipe(recipe);
         return ret;
     }
 }

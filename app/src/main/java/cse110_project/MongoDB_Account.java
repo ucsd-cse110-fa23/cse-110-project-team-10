@@ -8,7 +8,9 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.*;
+import org.json.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MongoDB_Account{
@@ -96,11 +98,17 @@ public class MongoDB_Account{
             accountsCollection = UserAccountDB.getCollection("accounts");
             Document account = accountsCollection.find(eq("username", user)).first();
             List<Document> recipes = (List<Document>)account.get("recipes");
-            
+
+            JSONObject cr = new JSONObject();
+            JSONArray recipesArray = new JSONArray();            
             if(recipes != null) {
-                for(Document recipe : recipes){
-                    state = JSONOperations.fromJSONString(recipe.toJson());
+                for (Document recipeDoc : recipes) {
+                    JSONObject recipeJson = new JSONObject(recipeDoc.toJson());
+                    recipesArray.put(recipeJson);
                 }
+                cr.put("recipes", recipesArray);
+                state = JSONOperations.fromJSONString(cr.toString());
+                System.out.println(cr.toString());
             }else{
                 state = new RecipeStateManager();
             }
