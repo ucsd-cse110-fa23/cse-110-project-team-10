@@ -20,7 +20,7 @@ public class Server {
 
     }
 
-    public void startServer() {
+    public void startServer() throws IOException{
         System.out.println("Starting the server...");
         // create a thread pool to handle requests
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);

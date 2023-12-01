@@ -486,7 +486,7 @@ interface ServerConnectionSituation {
 }
 
 // JavaFX Application main entry point
-public class App extends Application {
+public class App extends Application{
 
     public static final String serverURL = "http://127.0.0.1:8100";
 
@@ -513,25 +513,29 @@ public class App extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        // server.startServer();
-        primaryStage.setTitle("Recipe Run");
+    public void start(Stage primaryStage) throws IOException{
+        try{
+            server.startServer();
+            primaryStage.setTitle("Recipe Run");
 
-        this.primaryStage = primaryStage;
+            this.primaryStage = primaryStage;
 
-        LoginScreen login = new LoginScreen(this);
-        mainBox = new VBox();
-        mainBox.setAlignment(Pos.TOP_CENTER);
-        setupTitleBar(mainBox);
+            LoginScreen login = new LoginScreen(this);
+            mainBox = new VBox();
+            mainBox.setAlignment(Pos.TOP_CENTER);
+            setupTitleBar(mainBox);
 
-        recipesUI = new VBox();
-        updateFromServerState();
-        setupRecipeUI(mainBox);
+            recipesUI = new VBox();
+            updateFromServerState();
+            setupRecipeUI(mainBox);
 
-        Scene scene = new Scene(login, 800, 600);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        login.autoLogin();
+            Scene scene = new Scene(login, 800, 600);
+            primaryStage.setScene(scene);
+            primaryStage.show();
+            login.autoLogin();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void thereWasAServerError() {
@@ -553,7 +557,7 @@ public class App extends Application {
         return true;
     }
 
-    public void updateFromServerState() {
+    public void updateFromServerState(){
         ServerConnectionSituation situation = () -> {
             HttpClient client = HttpClient.newHttpClient();
             // Create the request object

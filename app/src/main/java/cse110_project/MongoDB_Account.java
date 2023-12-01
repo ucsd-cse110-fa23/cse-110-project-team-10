@@ -9,6 +9,8 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.*;
 
+import java.util.List;
+
 public class MongoDB_Account{
     private String url;
 
@@ -75,5 +77,34 @@ public class MongoDB_Account{
             e.printStackTrace();
         }
         return true;
+    }
+
+    public void updateRecipetoAccount(String user, Document recipe){
+        try (MongoClient mongoClient = MongoClients.create(url)){
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username", user)).first();
+            accountsCollection.updateOne(account, recipe);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void grabRecipeFromAccount(String user, RecipeStateManager state){
+        try(MongoClient mongoClient = MongoClients.create(url)){
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username", user)).first();
+            List<Document> recipes = (List<Document>)account.get("recipes");
+            
+            if(recipes != null) {
+                for(Document recipe : recipes){
+                    state = JSONOperations.fromJSONString(recipe.toJson());
+                }
+            }else{
+                state = new RecipeStateManager();
+            }
+
+        }
     }
 }
