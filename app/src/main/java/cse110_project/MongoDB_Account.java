@@ -104,7 +104,6 @@ public class MongoDB_Account{
             }else{
                 state = new RecipeStateManager();
             }
-
         }
     }
 }

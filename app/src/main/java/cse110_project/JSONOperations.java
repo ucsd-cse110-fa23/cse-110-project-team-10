@@ -34,14 +34,14 @@ public class JSONOperations {
     public static RecipeStateManager fromJSONString(String jsonString) {
         RecipeStateManager ret = new RecipeStateManager();
         JSONObject rootObject = new JSONObject(jsonString);
-        //JSONArray arr = rootObject.getJSONArray("recipes");
-        // for (int i = arr.length() - 1; i >= 0; i--) { // iterates backwards because addRecipe adds in reverse order
-        //     JSONObject recipeJSON = arr.getJSONObject(i);
-        //     Recipe recipe = fromJSON(recipeJSON);
-        //     ret.addRecipe(recipe);
-        // }
-        Recipe recipe = fromJSON(rootObject);
-        ret.addRecipe(recipe);
+        JSONArray arr = rootObject.getJSONArray("recipes");
+        for (int i = arr.length() - 1; i >= 0; i--) { // iterates backwards because addRecipe adds in reverse order
+            JSONObject recipeJSON = arr.getJSONObject(i);
+            Recipe recipe = fromJSON(recipeJSON);
+            ret.addRecipe(recipe);
+        }
+        // Recipe recipe = fromJSON(rootObject);
+        // ret.addRecipe(recipe);
         return ret;
     }
 }

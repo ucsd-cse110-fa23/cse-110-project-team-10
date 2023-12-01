@@ -18,31 +18,31 @@ public class RecipeStateHandler implements HttpHandler{
     private MongoDB_Account mongodb;
     private String user;
     private final String URI = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
-    private final String saveFilePath = "account.csv";
+    private final String saveFilePath = "recipes_server.json";
 
     public RecipeStateHandler() throws IOException{
         String savedData = "";
-        // try {
-        //     savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
-        // } catch (IOException e) {
-        //     System.out.println("Couldn't find saved file " + saveFilePath + " , making new save data");
-        // }
-        // if (savedData.length() > 0) {
-        //     System.out.println("Loading from " + saveFilePath);
-        //     state = JSONOperations.fromJSONString(savedData);
-        // } else {
-        //     state = new RecipeStateManager();
-        // }
-
-        try{
-            BufferedReader br = new BufferedReader(new FileReader(saveFilePath));
-            savedData = br.readLine();
-            user = savedData.split(",")[0];
-            mongodb = new MongoDB_Account(URI);
-            mongodb.grabRecipeFromAccount(user, state);
-        }catch (Exception e) {
+        try {
+            savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
+        } catch (IOException e) {
+            System.out.println("Couldn't find saved file " + saveFilePath + " , making new save data");
+        }
+        if (savedData.length() > 0) {
+            System.out.println("Loading from " + saveFilePath);
+            state = JSONOperations.fromJSONString(savedData);
+        } else {
             state = new RecipeStateManager();
         }
+        // try{
+        //     BufferedReader br = new BufferedReader(new FileReader(saveFilePath));
+        //     savedData = br.readLine();
+        //     user = savedData.split(",")[0];
+        //     br.close();
+        //     mongodb = new MongoDB_Account(URI);
+        //     mongodb.grabRecipeFromAccount(user, state);
+        // }catch (Exception e) {
+        //     state = new RecipeStateManager();
+        // }
     }
 
     @Override
@@ -65,9 +65,13 @@ public class RecipeStateHandler implements HttpHandler{
             //     e.printStackTrace();
             // }    
             //Create an update document for recipe
-            Document recipe = new Document("$set", Document.parse(JSONOperations.intoJSONString(state)));
-            mongodb.updateRecipetoAccount(user, recipe);
-
+            try{
+                Document recipe = new Document("$set", Document.parse(JSONOperations.intoJSONString(state)));
+                mongodb = new MongoDB_Account(URI);
+                mongodb.updateRecipetoAccount("whats", recipe);
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
 
             String response = "ok";
             httpExchange.sendResponseHeaders(200, response.length());
