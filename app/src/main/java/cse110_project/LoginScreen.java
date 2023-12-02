@@ -236,9 +236,8 @@ public class LoginScreen extends BorderPane {
                 lbox.setErrorMsg(ACC_ERROR);
             }
             else{
-                if(autoLoginBox.isSelected()){
-                    lbox.saveAutoLoginInfo();
-                }
+                lbox.saveAutoLoginInfo();
+                RecipeStateHandler.setUsername(user);
                 app.transitionToMainScreen();
             }
         });
@@ -249,7 +248,7 @@ public class LoginScreen extends BorderPane {
     }
 
     public void autoLogin(){
-        if(new File("account.csv").isFile()){
+        if(new File("account.csv").isFile() && autoLoginBox.isSelected()){
             lbox.loadLoginInfo();
             user = lbox.userInfo();
             pass = lbox.passInfo();

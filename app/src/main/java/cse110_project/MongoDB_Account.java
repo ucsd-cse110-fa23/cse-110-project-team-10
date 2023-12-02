@@ -92,12 +92,13 @@ public class MongoDB_Account{
         }
     }
 
-    public void grabRecipeFromAccount(String user, RecipeStateManager state){
+    public RecipeStateManager grabRecipeFromAccount(String user){
         try(MongoClient mongoClient = MongoClients.create(url)){
             UserAccountDB = mongoClient.getDatabase("user_account");
             accountsCollection = UserAccountDB.getCollection("accounts");
             Document account = accountsCollection.find(eq("username", user)).first();
             List<Document> recipes = (List<Document>)account.get("recipes");
+            RecipeStateManager state;
 
             JSONObject cr = new JSONObject();
             JSONArray recipesArray = new JSONArray();            
@@ -108,9 +109,10 @@ public class MongoDB_Account{
                 }
                 cr.put("recipes", recipesArray);
                 state = JSONOperations.fromJSONString(cr.toString());
-                System.out.println(cr.toString());
+                return state;
             }else{
                 state = new RecipeStateManager();
+                return state;
             }
         }
     }
