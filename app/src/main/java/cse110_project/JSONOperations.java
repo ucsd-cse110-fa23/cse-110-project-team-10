@@ -11,11 +11,12 @@ public class JSONOperations {
         ret.put("name", recipe.getRecipeName());
         ret.put("description", recipe.getRecipeDescription());
         ret.put("kind", recipe.getRecipeKind().name());
+        ret.put("img", recipe.getRecipeImage());
         return ret;
     }
 
     public static Recipe fromJSON(JSONObject obj) {
-        return new Recipe(obj.getString("name"), obj.getString("description"), RecipeKind.valueOf(obj.getString("kind")));
+        return new Recipe(obj.getString("name"), obj.getString("description"), RecipeKind.valueOf(obj.getString("kind")), obj.getString("img"));
     }
 
     public static String intoJSONString(RecipeStateManager manager) {

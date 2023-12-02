@@ -19,6 +19,7 @@ public class ListOrderingTest {
     String recipeName;
     String recipeDetails;
     RecipeKind mealType;
+    String url = "https://static.toiimg.com/thumb/83740315.cms?width=1200&height=900";
 
     @BeforeEach
     public void setup() {
@@ -27,7 +28,7 @@ public class ListOrderingTest {
             recipeName = "Recipe: " + i;
             recipeDetails = "";
             mealType = RecipeKind.valueOf("lunch");
-            Recipe recipe = new Recipe(recipeName, recipeDetails, mealType);
+            Recipe recipe = new Recipe(recipeName, recipeDetails, mealType, url);
             testRecipeList.addRecipe(recipe);
         }
     }
@@ -55,7 +56,7 @@ public class ListOrderingTest {
      */
     @Test
     public void testOrderAfterAdd() throws Exception {
-        Recipe newRecipe = new Recipe("new name", "new details", RecipeKind.valueOf("breakfast"));
+        Recipe newRecipe = new Recipe("new name", "new details", RecipeKind.valueOf("breakfast"), url);
         testRecipeList.addRecipe(newRecipe);
         assertEquals(newRecipe, testRecipeList.getRecipes().get(3));
         assertEquals("Recipe: 1", testRecipeList.getRecipes().get(1).getRecipeName());
@@ -73,7 +74,7 @@ public class ListOrderingTest {
         mockRecipeGenerate gpt = new mockRecipeGenerate(mType, ingredient);
 
         String result = gpt.generate();
-        Recipe newRecipe = new Recipe("name", result, RecipeKind.valueOf("dinner"));
+        Recipe newRecipe = new Recipe("name", result, RecipeKind.valueOf("dinner"), url);
         testRecipeList.addRecipe(newRecipe);
 
         assertEquals("name", testRecipeList.getRecipes().get(3).getRecipeName());

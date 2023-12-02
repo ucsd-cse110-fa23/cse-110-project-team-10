@@ -11,11 +11,13 @@ public class Recipe {
     private RecipeKind kind = RecipeKind.breakfast;
     private String name = "";
     private String description = "";
+    private String img = "";
 
-    Recipe(String name, String description, RecipeKind kind) {
+    Recipe(String name, String description, RecipeKind kind, String img) {
         this.name = name;
         this.description = description;
         this.kind = kind;
+        this.img = img;
     }
     Recipe() {}
 
@@ -28,6 +30,9 @@ public class Recipe {
     public RecipeKind getRecipeKind(){
         return kind;
     }
+    public String getRecipeImage() {
+        return img;
+    }
     public void setRecipeName(String newName){
         name = newName;
     }
@@ -36,5 +41,8 @@ public class Recipe {
     }
     public void setRecipeKind(RecipeKind newKind){
         kind = newKind;
+    }
+    public void setRecipeImage(String newImg) {
+        img = newImg;
     }
 }

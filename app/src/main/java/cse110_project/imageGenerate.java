@@ -59,6 +59,6 @@ public class imageGenerate {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "DNE";
+        return "unable to generate image";
     }
 }
