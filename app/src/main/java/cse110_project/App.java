@@ -598,13 +598,12 @@ public class App extends Application {
             String responseBody = response.body();
             state = JSONOperations.fromJSONString(responseBody);
             filterBox = filterUI.getBox();
-            filter = new Filter(state);
-
+            
             filterBox.setOnAction(e->{
                 resetRecipeUI();
-                System.out.println(filterBox.getValue().toLowerCase());
-                state = filter.filterType(filterBox.getValue().toLowerCase());
-                for (Recipe r : state.getRecipes()) {
+                filter = new Filter(state);
+                filterList = filter.filterType(filterBox.getValue().toLowerCase());
+                for (Recipe r : filterList.getRecipes()) {
                     addRecipeUI(r);
                 }
             });
