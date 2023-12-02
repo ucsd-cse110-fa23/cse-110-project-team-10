@@ -32,7 +32,6 @@ public class RecipeStateHandler implements HttpHandler{
             br.close();
             state = mongodb.grabRecipeFromAccount(user);
         }else{
-            System.out.println("Hello " + user);
             if(user == null){
                 state = new RecipeStateManager();
             }else{

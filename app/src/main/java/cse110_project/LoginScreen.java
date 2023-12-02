@@ -262,9 +262,11 @@ public class LoginScreen extends BorderPane {
         user = lbox.userInfo();
         pass = lbox.passInfo();
         isAuto = lbox.autoInfo();
-        if(isAuto.equals("true")){
-            if(mongodb.LookUpAccount(user,pass)){
-                app.transitionToMainScreen();
+        if(isAuto != null){
+            if(isAuto.equals("true")){
+                if(mongodb.LookUpAccount(user,pass)){
+                    app.transitionToMainScreen();
+                }
             }
         }
     }
