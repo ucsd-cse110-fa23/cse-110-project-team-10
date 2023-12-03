@@ -507,6 +507,31 @@ class FilterUI extends HBox {
     }
 }
 
+class SortUI extends HBox {
+    private ComboBox<String> sortBox;
+    private Label label;
+
+    SortUI() {
+        label = new Label("Sort");
+        label.setStyle("-fx-font-size:15;-fx-pref-height: 50px;-fx-pref-width: 40px");
+
+        sortBox = new ComboBox<>();
+        sortBox.setMinHeight(50.0);
+        sortBox.getItems().addAll(
+                "Default: Most Recent",
+                "Least Recent",
+                "A-Z",
+                "Z-A"
+        );
+        sortBox.setValue("Default: Most Recent");
+        this.getChildren().addAll(label, sortBox);
+    }
+
+    public ComboBox<String> getBox() {
+        return sortBox;
+    }
+}
+
 interface ServerConnectionSituation {
     void doServerStuff() throws Exception; // if there was an exception that means the request didn't go through
 }
@@ -534,6 +559,11 @@ public class App extends Application {
     private ComboBox<String> filterBox;
     private Filter filter;
     private RecipeStateManager filterList;
+
+    private SortUI sortUI = new SortUI();
+    private ComboBox<String> sortBox;
+    private Sort s;
+    private RecipeStateManager sortList;
 
     public static void main(String[] args) {
         launch(args);
@@ -598,12 +628,26 @@ public class App extends Application {
             String responseBody = response.body();
             state = JSONOperations.fromJSONString(responseBody);
             filterBox = filterUI.getBox();
+            sortBox = sortUI.getBox();
             
             filterBox.setOnAction(e->{
                 resetRecipeUI();
                 filter = new Filter(state);
                 filterList = filter.filterType(filterBox.getValue().toLowerCase());
                 for (Recipe r : filterList.getRecipes()) {
+                    addRecipeUI(r);
+                }
+            });
+
+            sortBox.setOnAction(e->{
+                resetRecipeUI();
+                s = new Sort(state);
+                sortList = s.sort(sortBox.getValue().toLowerCase());
+                if(sortBox.getValue().equals("A-Z") || sortBox.getValue().equals("Z-A")){
+                    Collections.reverse(sortList.getRecipes());
+                }
+                
+                for (Recipe r : sortList.getRecipes()) {
                     addRecipeUI(r);
                 }
             });
@@ -667,7 +711,7 @@ public class App extends Application {
         Region spacer = new Region();
         spacer.setMinWidth(50.0);
         titleHbox.setSpacing(15);
-        titleHbox.getChildren().addAll(filterUI, newRecipe, spacer);
+        titleHbox.getChildren().addAll(sortUI, filterUI, newRecipe, spacer);
         mainBox.getChildren().add(titleHbox);
     }
 

@@ -10,8 +10,6 @@ import javafx.scene.layout.*;
 public class Filter {
     private RecipeStateManager recipeList;
 
-    Filter(){}
-
     Filter(RecipeStateManager inputList){
         recipeList = new RecipeStateManager(inputList.getRecipes());
     }
