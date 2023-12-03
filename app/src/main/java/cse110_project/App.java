@@ -558,12 +558,15 @@ public class App extends Application {
     private FilterUI filterUI = new FilterUI();
     private ComboBox<String> filterBox;
     private Filter filter;
-    private RecipeStateManager filterList;
 
     private SortUI sortUI = new SortUI();
     private ComboBox<String> sortBox;
-    private Sort s;
-    private RecipeStateManager sortList;
+    private Sort sort;
+
+    private Modify m;
+    private RecipeStateManager modifiedList;
+    private String sortCategory;
+    private String mealType;
 
     public static void main(String[] args) {
         launch(args);
@@ -629,27 +632,17 @@ public class App extends Application {
             state = JSONOperations.fromJSONString(responseBody);
             filterBox = filterUI.getBox();
             sortBox = sortUI.getBox();
+            sortCategory = "default: most recent";
+            mealType = "default";
             
             filterBox.setOnAction(e->{
-                resetRecipeUI();
-                filter = new Filter(state);
-                filterList = filter.filterType(filterBox.getValue().toLowerCase());
-                for (Recipe r : filterList.getRecipes()) {
-                    addRecipeUI(r);
-                }
+                mealType = filterBox.getValue().toLowerCase();
+                modifyUI();
             });
 
             sortBox.setOnAction(e->{
-                resetRecipeUI();
-                s = new Sort(state);
-                sortList = s.sort(sortBox.getValue().toLowerCase());
-                if(sortBox.getValue().equals("A-Z") || sortBox.getValue().equals("Z-A")){
-                    Collections.reverse(sortList.getRecipes());
-                }
-                
-                for (Recipe r : sortList.getRecipes()) {
-                    addRecipeUI(r);
-                }
+                sortCategory = sortBox.getValue().toLowerCase();
+                modifyUI();
             });
 
             for (Recipe r : state.getRecipes()) {
@@ -660,6 +653,18 @@ public class App extends Application {
             System.err.println("Failed to update from remote state");
             thereWasAServerError();
             state = new RecipeStateManager();
+        }
+    }
+
+    private void modifyUI(){
+        resetRecipeUI();
+        m = new Modify(state);
+        modifiedList = m.modify(mealType, sortCategory);
+        if(sortCategory.equals("a-z") || sortCategory.equals("z-a")){
+            Collections.reverse(modifiedList.getRecipes());
+        }
+        for (Recipe r : modifiedList.getRecipes()) {
+            addRecipeUI(r);
         }
     }
 

@@ -4,20 +4,23 @@ import org.junit.jupiter.api.Test;
 
 import cse110_project.Recipe;
 import cse110_project.RecipeStateManager;
+import cse110_project.Sort;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.BeforeEach;
 
 public class SortTest {
     RecipeStateManager testList;
-    RecipeStateManager sortList;
+    ArrayList<Recipe> sortList;
     Sort testSort;
     RecipeKind test = RecipeKind.valueOf("breakfast");
 
     @BeforeEach
     public void setup() {
         testList = new RecipeStateManager();
-        sortList = new RecipeStateManager();
         Recipe a = new Recipe("a", "a", test);
         Recipe b = new Recipe("b", "b", test);
         Recipe c = new Recipe("c", "c", test);
@@ -28,7 +31,7 @@ public class SortTest {
         testList.addRecipe(d);
         testList.addRecipe(b);
 
-        testSort = new Sort(testList);
+        testSort = new Sort();
     }
 
     /**
@@ -36,9 +39,9 @@ public class SortTest {
      */
     @Test
     public void sortDefaultTest() throws Exception {
-        sortList = testSort.sort("default: most recent");
+        sortList = testSort.sortDefault(testList.getRecipes());
 
-        assertEquals(testList.getRecipes(), sortList.getRecipes());
+        assertEquals(testList.getRecipes(), sortList);
     }
     
     /**
@@ -46,10 +49,10 @@ public class SortTest {
      */
     @Test
     public void sortLeastRecentTest() throws Exception {
-        sortList = testSort.sort("least recent");
+        sortList = testSort.sortOldest(testList.getRecipes());
 
-        assertEquals("b", sortList.getRecipes().get(0).getRecipeName());
-        assertEquals("c", sortList.getRecipes().get(3).getRecipeName());
+        assertEquals("b", sortList.get(0).getRecipeName());
+        assertEquals("c", sortList.get(3).getRecipeName());
     }
 
     /**
@@ -57,12 +60,12 @@ public class SortTest {
      */
     @Test
     public void sortAlphabetOrder() throws Exception {
-        sortList = testSort.sort("a-z");
+        sortList = testSort.sortAlphabetOrder(testList.getRecipes());
 
-        assertEquals("a", sortList.getRecipes().get(0).getRecipeName());
-        assertEquals("b", sortList.getRecipes().get(1).getRecipeName());
-        assertEquals("c", sortList.getRecipes().get(2).getRecipeName());
-        assertEquals("d", sortList.getRecipes().get(3).getRecipeName());
+        assertEquals("a", sortList.get(0).getRecipeName());
+        assertEquals("b", sortList.get(1).getRecipeName());
+        assertEquals("c", sortList.get(2).getRecipeName());
+        assertEquals("d", sortList.get(3).getRecipeName());
     }
 
     /**
@@ -70,9 +73,9 @@ public class SortTest {
      */
     @Test
     public void sortReverseAlphabetOrder() throws Exception {
-        sortList = testSort.sort("z-a");
+        sortList = testSort.sortReverseAlphabet(testList.getRecipes());
 
-        assertEquals("d", sortList.getRecipes().get(0).getRecipeName());
-        assertEquals("a", sortList.getRecipes().get(3).getRecipeName());
+        assertEquals("d", sortList.get(0).getRecipeName());
+        assertEquals("a", sortList.get(3).getRecipeName());
     }
 }
