@@ -108,8 +108,8 @@ class postRecipeCreate extends VBox {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, updatedDesc, rKind);
 
-            app.addRecipeUI(newRecipe);
             app.getState().addRecipe(newRecipe);
+            app.modifyUI();
             app.writeServerState();
 
             postCreateStage.close();
@@ -557,11 +557,9 @@ public class App extends Application {
 
     private FilterUI filterUI = new FilterUI();
     private ComboBox<String> filterBox;
-    private Filter filter;
 
     private SortUI sortUI = new SortUI();
     private ComboBox<String> sortBox;
-    private Sort sort;
 
     private Modify m;
     private RecipeStateManager modifiedList;
@@ -630,6 +628,7 @@ public class App extends Application {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
             state = JSONOperations.fromJSONString(responseBody);
+
             filterBox = filterUI.getBox();
             sortBox = sortUI.getBox();
             sortCategory = "default: most recent";
@@ -655,8 +654,9 @@ public class App extends Application {
             state = new RecipeStateManager();
         }
     }
-
-    private void modifyUI(){
+    
+    //update UI after filter and sort
+    public void modifyUI(){
         resetRecipeUI();
         m = new Modify(state);
         modifiedList = m.modify(mealType, sortCategory);
