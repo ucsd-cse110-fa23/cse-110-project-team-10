@@ -14,6 +14,7 @@ import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -499,6 +500,31 @@ class DetailedViewScreen extends VBox {
     }
 }
 
+class FilterUI extends HBox {
+    private ComboBox<String> filterBox;
+    private Label label;
+
+    FilterUI() {
+        label = new Label("Filter");
+        label.setStyle("-fx-font-size:15;-fx-pref-height: 50px;-fx-pref-width: 40px");
+
+        filterBox = new ComboBox<>();
+        filterBox.setMinHeight(50.0);
+        filterBox.getItems().addAll(
+                "Default",
+                "Breakfast",
+                "Lunch",
+                "Dinner"
+        );
+        filterBox.setValue("Default");
+        this.getChildren().addAll(label, filterBox);
+    }
+
+    public ComboBox<String> getBox() {
+        return filterBox;
+    }
+}
+
 interface ServerConnectionSituation {
     void doServerStuff() throws Exception; // if there was an exception that means the request didn't go through
 }
@@ -523,6 +549,11 @@ public class App extends Application{
     public VBox mainBox;
     public VBox recipesUI;
 
+    private FilterUI filterUI = new FilterUI();
+    private ComboBox<String> filterBox;
+    private Filter filter;
+    private RecipeStateManager filterList;
+
     public static void main(String[] args) {
         launch(args);
     }
@@ -532,29 +563,25 @@ public class App extends Application{
     }
 
     @Override
-    public void start(Stage primaryStage) throws IOException{
-        try{
-            server.startServer();
-            primaryStage.setTitle("Recipe Run");
+    public void start(Stage primaryStage) {
+        server.startServer();
+        primaryStage.setTitle("Recipe Run");
 
-            this.primaryStage = primaryStage;
+        this.primaryStage = primaryStage;
 
-            LoginScreen login = new LoginScreen(this);
-            mainBox = new VBox();
-            mainBox.setAlignment(Pos.TOP_CENTER);
-            setupTitleBar(mainBox);
+        LoginScreen login = new LoginScreen(this);
+        mainBox = new VBox();
+        mainBox.setAlignment(Pos.TOP_CENTER);
+        setupTitleBar(mainBox);
 
-            recipesUI = new VBox();
-            updateFromServerState();
-            setupRecipeUI(mainBox);
+        recipesUI = new VBox();
+        updateFromServerState();
+        setupRecipeUI(mainBox);
 
-            Scene scene = new Scene(login, 800, 600);
-            primaryStage.setScene(scene);
-            primaryStage.show();
-            login.autoLogin();
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        Scene scene = new Scene(login, 800, 600);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+        login.autoLogin();
     }
 
     public void thereWasAServerError() {
@@ -589,6 +616,16 @@ public class App extends Application{
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
             state = JSONOperations.fromJSONString(responseBody);
+            filterBox = filterUI.getBox();
+            
+            filterBox.setOnAction(e->{
+                resetRecipeUI();
+                filter = new Filter(state);
+                filterList = filter.filterType(filterBox.getValue().toLowerCase());
+                for (Recipe r : filterList.getRecipes()) {
+                    addRecipeUI(r);
+                }
+            });
 
             for (Recipe r : state.getRecipes()) {
                 addRecipeUI(r);
@@ -648,7 +685,8 @@ public class App extends Application{
 
         Region spacer = new Region();
         spacer.setMinWidth(50.0);
-        titleHbox.getChildren().addAll(newRecipe, spacer);
+        titleHbox.setSpacing(15);
+        titleHbox.getChildren().addAll(filterUI, newRecipe, spacer);
         mainBox.getChildren().add(titleHbox);
     }
 
@@ -729,6 +767,10 @@ public class App extends Application{
         recipePane.setPadding(new Insets(20.0));
 
         recipesUI.getChildren().add(0, recipePane);
+    }
+
+    public void resetRecipeUI(){
+        recipesUI.getChildren().clear();
     }
 }
 // public class App extends Application {
