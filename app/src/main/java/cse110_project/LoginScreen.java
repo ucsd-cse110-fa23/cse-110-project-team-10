@@ -111,7 +111,6 @@ class LoginBox extends VBox {
 
         autoLoginBox = new CheckBox("Automatic Login");
         autoLoginBox.setIndeterminate(false);
-
         isMatch = false;
 
         this.getChildren().addAll(username, password, errorMessage, autoLoginBox);
@@ -165,6 +164,23 @@ class LoginBox extends VBox {
                 String[] acc = br.readLine().split(",");
                 username.getUserInfo().setText(acc[0]);
                 password.getUserInfo().setText(acc[1]);
+                isAuto = acc[2];
+            }
+            
+            br.close();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
+    public void loadLoginflag(){
+        try{
+            FileReader file = new FileReader("account.csv");
+            BufferedReader br = new BufferedReader(file);
+
+            while(br.ready()){
+                String[] acc = br.readLine().split(",");
                 isAuto = acc[2];
             }
             
@@ -255,15 +271,14 @@ public class LoginScreen extends BorderPane {
         });
     }
 
-    
-
     public void autoLogin(){
-        lbox.loadLoginInfo();
-        user = lbox.userInfo();
-        pass = lbox.passInfo();
+        lbox.loadLoginflag();
         isAuto = lbox.autoInfo();
         if(isAuto != null){
             if(isAuto.equals("true")){
+                lbox.loadLoginInfo();
+                user = lbox.userInfo();
+                pass = lbox.passInfo();
                 if(mongodb.LookUpAccount(user,pass)){
                     app.transitionToMainScreen();
                 }
