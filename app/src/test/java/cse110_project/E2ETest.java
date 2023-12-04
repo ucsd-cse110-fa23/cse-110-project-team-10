@@ -30,11 +30,11 @@ public class E2ETest {
         testMongodb.Delete(testUser);
 
         testList = new RecipeStateManager();
-        Recipe b1 = new Recipe("b1", "b1", RecipeKind.valueOf("breakfast"));
-        Recipe b2 = new Recipe("b2", "b2", RecipeKind.valueOf("breakfast"));
-        Recipe l = new Recipe("l", "l", RecipeKind.valueOf("lunch"));
-        Recipe d1 = new Recipe("d1", "d", RecipeKind.valueOf("dinner"));
-        Recipe d2 = new Recipe("d2", "d", RecipeKind.valueOf("dinner"));
+        Recipe b1 = new Recipe("b1", "b1", RecipeKind.valueOf("breakfast"), "");
+        Recipe b2 = new Recipe("b2", "b2", RecipeKind.valueOf("breakfast"), "");
+        Recipe l = new Recipe("l", "l", RecipeKind.valueOf("lunch"), "");
+        Recipe d1 = new Recipe("d1", "d", RecipeKind.valueOf("dinner"), "");
+        Recipe d2 = new Recipe("d2", "d", RecipeKind.valueOf("dinner"), "");
 
         testList.addRecipe(b2);
         testList.addRecipe(d1);

@@ -17,10 +17,10 @@ public class FilterTest {
     public void setup() {
         testList = new RecipeStateManager();
         filterList = new RecipeStateManager();
-        Recipe b1 = new Recipe("b1", "b1", RecipeKind.valueOf("breakfast"));
-        Recipe b2 = new Recipe("b2", "b2", RecipeKind.valueOf("breakfast"));
-        Recipe l = new Recipe("l", "l", RecipeKind.valueOf("lunch"));
-        Recipe d = new Recipe("d", "d", RecipeKind.valueOf("dinner"));
+        Recipe b1 = new Recipe("b1", "b1", RecipeKind.valueOf("breakfast"), "");
+        Recipe b2 = new Recipe("b2", "b2", RecipeKind.valueOf("breakfast"), "");
+        Recipe l = new Recipe("l", "l", RecipeKind.valueOf("lunch"), "");
+        Recipe d = new Recipe("d", "d", RecipeKind.valueOf("dinner"), "");
 
         testList.addRecipe(b2);
         testList.addRecipe(d);

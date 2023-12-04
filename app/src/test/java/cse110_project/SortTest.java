@@ -21,10 +21,10 @@ public class SortTest {
     @BeforeEach
     public void setup() {
         testList = new RecipeStateManager();
-        Recipe a = new Recipe("a", "a", test);
-        Recipe b = new Recipe("b", "b", test);
-        Recipe c = new Recipe("c", "c", test);
-        Recipe d = new Recipe("d", "d", test);
+        Recipe a = new Recipe("a", "a", test, "");
+        Recipe b = new Recipe("b", "b", test, "");
+        Recipe c = new Recipe("c", "c", test, "");
+        Recipe d = new Recipe("d", "d", test, "");
 
         testList.addRecipe(c);
         testList.addRecipe(a);
