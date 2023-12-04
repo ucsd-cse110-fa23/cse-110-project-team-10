@@ -14,13 +14,14 @@ public class SaveAndEditRecipeTest {
     private String name;
     private String ingred;
     private String newIngred;
+    private String url = "https://static.toiimg.com/thumb/83740315.cms?width=1200&height=900";
 
     @BeforeEach
     public void setup() {
         name = "sandwich";
         ingred = "apple, banana, cabbage, dikon, eggplant, flour";
         RecipeKind kind = RecipeKind.valueOf("dinner");
-        test = new Recipe(name, ingred, kind);
+        test = new Recipe(name, ingred, kind, url);
     }
     @Test
     public void testTemplate() {

@@ -7,7 +7,7 @@ import cse110_project.JSONOperations;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Files;
-//import main.java.cse110_project.Recipe;
+//import main.java.cse110_project.Recipe;.
 //import main.java.cse110_project.Recipe;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,6 +25,7 @@ public class SaveAndReadJSONtest {
     String rName;
     String rDesc;
     RecipeKind rKind;
+    String url = "https://static.toiimg.com/thumb/83740315.cms?width=1200&height=900";
 
     @BeforeEach
     public void setup() {
@@ -32,7 +33,7 @@ public class SaveAndReadJSONtest {
             rName = "Recipe #" + i;
             rDesc = "";
             rKind = RecipeKind.valueOf("dinner");
-            Recipe toAdd = new Recipe(rName, rDesc, rKind);
+            Recipe toAdd = new Recipe(rName, rDesc, rKind, url);
             testState.addRecipe(toAdd);
         }
 

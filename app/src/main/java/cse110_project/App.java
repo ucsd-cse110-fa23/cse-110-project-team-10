@@ -35,6 +35,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -44,6 +46,7 @@ class postRecipeCreate extends VBox {
     public String rName;
     public String rDesc;
     public RecipeKind rKind;
+    public String rImg;
 
     private Button saveRecipeButton;
     private Button editRecipeButton;
@@ -75,6 +78,7 @@ class postRecipeCreate extends VBox {
             rName = responseJson.getString("name");
             rDesc = responseJson.getString("desc");
             rKind = RecipeKind.valueOf(responseJson.getString("kind"));
+            rImg = responseJson.getString("img");
         } catch (Exception e) {
             System.err.println("Failed to generate");
             e.printStackTrace();
@@ -105,7 +109,7 @@ class postRecipeCreate extends VBox {
     public void postRecipeCreateDisplay(App app) {
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
-            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind);
+            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind, rImg);
 
             app.addRecipeUI(newRecipe);
             app.getState().addRecipe(newRecipe);
@@ -135,11 +139,18 @@ class postRecipeCreate extends VBox {
         recipeDetail.getChildren().addAll(recipeDescription);
         recipeDetail.setPadding(new Insets(10, 10, 10, 10));
 
+        VBox recipeImage = new VBox();
+        String fimg = rImg;
+        Image foodImg = new Image(fimg);
+        ImageView imageView = new ImageView(foodImg);
+        recipeImage.getChildren().addAll(imageView);
+        recipeImage.setAlignment(Pos.CENTER);
+
         ScrollPane sp = new ScrollPane(recipeDetail);
         sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 
-        this.getChildren().addAll(buttonArea, sp);
+        this.getChildren().addAll(buttonArea, sp, recipeImage);
 
         scene = new Scene(this, 550, 550);
 
@@ -341,7 +352,7 @@ class newScreen extends VBox {
         }
         fileInputStream.close();
     }
-
+    
     private String getVoiceInput() throws Exception {
         Whisper voiceInput = new Whisper();
         String path = "recording.wav";
@@ -470,7 +481,14 @@ class DetailedViewScreen extends VBox {
         recipeDetail.getChildren().addAll(recipeDescription);
         recipeDetail.setPadding(new Insets(10, 10, 10, 10));
 
-        this.getChildren().addAll(buttonArea, recipeDetail);
+        VBox recipeImage = new VBox();
+        String fimg = tempR.getRecipeImage();
+        Image foodImg = new Image(fimg);
+        ImageView imageView = new ImageView(foodImg);
+        recipeImage.getChildren().addAll(imageView);
+        recipeImage.setAlignment(Pos.CENTER);
+
+        this.getChildren().addAll(buttonArea, recipeDetail, recipeImage);
 
         scene = new Scene(this, 550, 550);
 
@@ -496,6 +514,7 @@ public class App extends Application{
     private RecipeStateManager state;
     private Server server = new Server();
     private newScreen ns;
+    private String rImg;
 
     private Stage primaryStage;
 
@@ -656,6 +675,16 @@ public class App extends Application{
         recipeHbox.setMinHeight(100.0);
 
         {
+            VBox recipeImage = new VBox();
+            String fimg = recipe.getRecipeImage();
+            Image foodImg = new Image(fimg);
+            ImageView imageView = new ImageView(foodImg);
+            recipeImage.getChildren().addAll(imageView);
+            recipeImage.setAlignment(Pos.CENTER);
+            recipeHbox.getChildren().add(recipeImage);
+        }
+
+        {
             StackPane descPane = new StackPane();
             HBox.setHgrow(descPane, Priority.ALWAYS);
 
@@ -674,7 +703,7 @@ public class App extends Application{
                 ds.ShowDetailedView(this);
                 System.out.println(recipe.getRecipeDescription());
             });
-
+            
             // recipe type
             Label recipeType = new Label(recipe.getRecipeKind().name());
             recipeType.setAlignment(Pos.CENTER_RIGHT);
@@ -696,7 +725,7 @@ public class App extends Application{
             delPane.setPadding(new Insets(20.0));
             recipeHbox.getChildren().add(delPane);
         }
-
+        
         recipePane.setPadding(new Insets(20.0));
 
         recipesUI.getChildren().add(0, recipePane);

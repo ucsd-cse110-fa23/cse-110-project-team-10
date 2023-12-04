@@ -32,6 +32,7 @@ public class RecipeRequestHandler implements HttpHandler {
         String rName = "";
         String rDesc = "";
         String rKind = "";
+        String rImg = "";
         while (!done) {
             try {
                 String ro = rg.generate();
@@ -45,11 +46,15 @@ public class RecipeRequestHandler implements HttpHandler {
             }
         }
 
+        imageGenerate ig = new imageGenerate(rName);
+        rImg = ig.generate();
+
         JSONObject toReturn = new JSONObject();
         toReturn.put("name", rName);
         toReturn.put("desc", rDesc);
         toReturn.put("kind", rKind);
-
+        toReturn.put("img", rImg);
+        
         response = toReturn.toString();
 
         httpExchange.sendResponseHeaders(200, response.length());
