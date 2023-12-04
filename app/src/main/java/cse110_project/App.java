@@ -112,8 +112,8 @@ class postRecipeCreate extends VBox {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, updatedDesc, rKind, rImg);
 
-            app.addRecipeUI(newRecipe);
             app.getState().addRecipe(newRecipe);
+            app.modifyUI();
             app.writeServerState();
 
             postCreateStage.close();
@@ -525,6 +525,31 @@ class FilterUI extends HBox {
     }
 }
 
+class SortUI extends HBox {
+    private ComboBox<String> sortBox;
+    private Label label;
+
+    SortUI() {
+        label = new Label("Sort");
+        label.setStyle("-fx-font-size:15;-fx-pref-height: 50px;-fx-pref-width: 40px");
+
+        sortBox = new ComboBox<>();
+        sortBox.setMinHeight(50.0);
+        sortBox.getItems().addAll(
+                "Default: Most Recent",
+                "Least Recent",
+                "A-Z",
+                "Z-A"
+        );
+        sortBox.setValue("Default: Most Recent");
+        this.getChildren().addAll(label, sortBox);
+    }
+
+    public ComboBox<String> getBox() {
+        return sortBox;
+    }
+}
+
 interface ServerConnectionSituation {
     void doServerStuff() throws Exception; // if there was an exception that means the request didn't go through
 }
@@ -551,8 +576,14 @@ public class App extends Application{
 
     private FilterUI filterUI = new FilterUI();
     private ComboBox<String> filterBox;
-    private Filter filter;
-    private RecipeStateManager filterList;
+
+    private SortUI sortUI = new SortUI();
+    private ComboBox<String> sortBox;
+
+    private Modify m;
+    private RecipeStateManager modifiedList;
+    private String sortCategory;
+    private String mealType;
 
     public static void main(String[] args) {
         launch(args);
@@ -616,15 +647,20 @@ public class App extends Application{
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
             state = JSONOperations.fromJSONString(responseBody);
+
             filterBox = filterUI.getBox();
+            sortBox = sortUI.getBox();
+            sortCategory = "default: most recent";
+            mealType = "default";
             
             filterBox.setOnAction(e->{
-                resetRecipeUI();
-                filter = new Filter(state);
-                filterList = filter.filterType(filterBox.getValue().toLowerCase());
-                for (Recipe r : filterList.getRecipes()) {
-                    addRecipeUI(r);
-                }
+                mealType = filterBox.getValue().toLowerCase();
+                modifyUI();
+            });
+
+            sortBox.setOnAction(e->{
+                sortCategory = sortBox.getValue().toLowerCase();
+                modifyUI();
             });
 
             for (Recipe r : state.getRecipes()) {
@@ -635,6 +671,19 @@ public class App extends Application{
             System.err.println("Failed to update from remote state");
             thereWasAServerError();
             state = new RecipeStateManager();
+        }
+    }
+    
+    //update UI after filter and sort
+    public void modifyUI(){
+        resetRecipeUI();
+        m = new Modify(state);
+        modifiedList = m.modify(mealType, sortCategory);
+        if(sortCategory.equals("a-z") || sortCategory.equals("z-a")){
+            Collections.reverse(modifiedList.getRecipes());
+        }
+        for (Recipe r : modifiedList.getRecipes()) {
+            addRecipeUI(r);
         }
     }
 
@@ -686,7 +735,7 @@ public class App extends Application{
         Region spacer = new Region();
         spacer.setMinWidth(50.0);
         titleHbox.setSpacing(15);
-        titleHbox.getChildren().addAll(filterUI, newRecipe, spacer);
+        titleHbox.getChildren().addAll(sortUI, filterUI, newRecipe, spacer);
         mainBox.getChildren().add(titleHbox);
     }
 
