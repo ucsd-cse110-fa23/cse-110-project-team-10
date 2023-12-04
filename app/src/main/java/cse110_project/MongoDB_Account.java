@@ -8,6 +8,10 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.*;
+import org.json.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MongoDB_Account{
     private String url;
@@ -75,5 +79,41 @@ public class MongoDB_Account{
             e.printStackTrace();
         }
         return true;
+    }
+
+    public void updateRecipetoAccount(String user, Document recipe){
+        try (MongoClient mongoClient = MongoClients.create(url)){
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username", user)).first();
+            accountsCollection.updateOne(account, recipe);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public RecipeStateManager grabRecipeFromAccount(String user){
+        try(MongoClient mongoClient = MongoClients.create(url)){
+            UserAccountDB = mongoClient.getDatabase("user_account");
+            accountsCollection = UserAccountDB.getCollection("accounts");
+            Document account = accountsCollection.find(eq("username", user)).first();
+            List<Document> recipes = (List<Document>)account.get("recipes");
+            RecipeStateManager state;
+
+            JSONObject cr = new JSONObject();
+            JSONArray recipesArray = new JSONArray();            
+            if(recipes != null) {
+                for (Document recipeDoc : recipes) {
+                    JSONObject recipeJson = new JSONObject(recipeDoc.toJson());
+                    recipesArray.put(recipeJson);
+                }
+                cr.put("recipes", recipesArray);
+                state = JSONOperations.fromJSONString(cr.toString());
+                return state;
+            }else{
+                state = new RecipeStateManager();
+                return state;
+            }
+        }
     }
 }
