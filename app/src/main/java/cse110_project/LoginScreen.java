@@ -93,6 +93,8 @@ class LoginBox extends VBox {
     private LoginInfo username;
     private LoginInfo password;
 
+    private String isAuto;
+
     private Label errorMessage;
     private boolean isMatch;
     private CheckBox autoLoginBox;
@@ -128,6 +130,10 @@ class LoginBox extends VBox {
         return password.getUserInfo().getText();
     }
 
+    public String autoInfo(){
+        return this.isAuto;
+    }
+
     public void setErrorMsg(String prompt){
         errorMessage.setText(prompt);
     }
@@ -141,7 +147,7 @@ class LoginBox extends VBox {
         try {
             FileWriter fw = new FileWriter("account.csv");
 
-            fw.write(userInfo() + "," + passInfo());
+            fw.write(userInfo() + "," + passInfo() + "," + String.valueOf(autoLoginBox.isSelected()));
             fw.close();
 
         } catch (Exception e) {
@@ -156,9 +162,10 @@ class LoginBox extends VBox {
             BufferedReader br = new BufferedReader(file);
 
             while(br.ready()){
-                String acc = br.readLine();
-                username.getUserInfo().setText(acc.substring(0, acc.indexOf(",")));
-                password.getUserInfo().setText(acc.substring(acc.indexOf(",") + 1));
+                String[] acc = br.readLine().split(",");
+                username.getUserInfo().setText(acc[0]);
+                password.getUserInfo().setText(acc[1]);
+                isAuto = acc[2];
             }
             
             br.close();
@@ -177,6 +184,7 @@ public class LoginScreen extends BorderPane {
 
     private String user = "";
     private String pass = "";
+    private String isAuto = "";
 
     private CreateAccScreen createscreen;
     private LoginBox lbox;
@@ -236,9 +244,8 @@ public class LoginScreen extends BorderPane {
                 lbox.setErrorMsg(ACC_ERROR);
             }
             else{
-                if(autoLoginBox.isSelected()){
-                    lbox.saveAutoLoginInfo();
-                }
+                lbox.saveAutoLoginInfo();
+                RecipeStateHandler.setUsername(user);
                 app.transitionToMainScreen();
             }
         });
@@ -248,13 +255,18 @@ public class LoginScreen extends BorderPane {
         });
     }
 
+    
+
     public void autoLogin(){
-        if(new File("account.csv").isFile()){
-            lbox.loadLoginInfo();
-            user = lbox.userInfo();
-            pass = lbox.passInfo();
-            if(mongodb.LookUpAccount(user,pass)){
-                app.transitionToMainScreen();
+        lbox.loadLoginInfo();
+        user = lbox.userInfo();
+        pass = lbox.passInfo();
+        isAuto = lbox.autoInfo();
+        if(isAuto != null){
+            if(isAuto.equals("true")){
+                if(mongodb.LookUpAccount(user,pass)){
+                    app.transitionToMainScreen();
+                }
             }
         }
     }
