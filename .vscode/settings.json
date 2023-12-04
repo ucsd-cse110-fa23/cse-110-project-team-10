@@ -1,5 +1,5 @@
 {
-    "java.project.sourcePaths": ["app/src"],
+    "java.project.sourcePaths": ["app/src/mzin/java/cse110_project"],
     "java.project.outputPath": "bin",
     "java.project.referencedLibraries": [
         "app/lib/**/*.jar"

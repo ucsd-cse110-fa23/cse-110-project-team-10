@@ -4,27 +4,27 @@
 package cse110_project;
 
 import java.io.*;
-import java.util.ArrayList;
+import java.util.*;
 import org.json.JSONObject;
-import java.util.Collections;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.scene.control.TextArea;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-
+//import org.w3c.dom.Text;
+import javafx.scene.text.*;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
+
 import java.nio.file.Paths;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.VBox;
@@ -207,6 +207,7 @@ class newScreen extends VBox {
     private static final String RESPONSE = "Your response is: ";
     private static final String MEAL_PROMPT = "Please select your meal type: Breakfast, Lunch, or Dinner";
     private static final String INGREDIENT_PROMPT = "Please list the ingredients you have";
+    private static final String ERROR_PROMPT = "Sentence doesn't contain mealtype, please retry!";
 
     private Prompt mealPrompt;
     private Prompt ingredientPrompt;
@@ -264,7 +265,23 @@ class newScreen extends VBox {
                 else {
                     aRecord.stopRecording();
                     mealType = getVoiceInput();
-                    mealPrompt.setLabel(RESPONSE + mealType);
+                    // checking if user mention any of the mealtype
+                    if (mealType.toLowerCase().contains("breakfast")) {
+                        mealType = "breakfast";
+                    } else if (mealType.toLowerCase().contains("lunch")) {
+                        mealType = "lunch";
+                    } else if (mealType.toLowerCase().contains("dinner")) {
+                        mealType = "dinner";
+                    } else {
+                        mealType = "";
+                    }
+
+                    if (mealType != "") {
+                        mealPrompt.setLabel(RESPONSE + mealType);
+                    } else {
+                        mealPrompt.setLabel(ERROR_PROMPT);
+                    }
+
                     // Prompt user to input ingredient list after finish recording meal type
                     ingredientPrompt.setLabel(INGREDIENT_PROMPT);
                     if (mealType != "" && mealList != "") {
@@ -411,7 +428,6 @@ class DetailedViewScreen extends VBox {
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
     DetailedViewScreen(Recipe r) {
-
         tempR = r;
         postCreateStage = new Stage();
         recipeDescription = new TextArea();
@@ -483,33 +499,85 @@ class DetailedViewScreen extends VBox {
     }
 }
 
-// JavaFX Application main entry point
-public class App extends Application {
+interface ServerConnectionSituation {
+    void doServerStuff() throws Exception; // if there was an exception that means the request didn't go through
+}
 
-    private newScreen ns;
-    private DetailedViewScreen ds;
+// JavaFX Application main entry point
+public class App extends Application{
+
     public static final String serverURL = "http://127.0.0.1:8100";
+
+    private String rName;
+    private String rDesc;
+
+    private RecipeStateManager state;
+    private Server server = new Server();
+    private newScreen ns;
+    private String rImg;
+
+    private Stage primaryStage;
+
+    private DetailedViewScreen ds;
+    private RecipeKind rKind;
+    public VBox mainBox;
+    public VBox recipesUI;
 
     public static void main(String[] args) {
         launch(args);
     }
 
-    private RecipeStateManager state;
-
     RecipeStateManager getState() {
         return state;
     }
 
-    public VBox recipesUI;
+    @Override
+    public void start(Stage primaryStage) throws IOException{
+        try{
+            server.startServer();
+            primaryStage.setTitle("Recipe Run");
 
-    private String rName;
-    private String rDesc;
-    private RecipeKind rKind;
-    private String rImg;
-    private Server server = new Server();
+            this.primaryStage = primaryStage;
 
-    public void updateFromServerState() {
+            LoginScreen login = new LoginScreen(this);
+            mainBox = new VBox();
+            mainBox.setAlignment(Pos.TOP_CENTER);
+            setupTitleBar(mainBox);
+
+            recipesUI = new VBox();
+            updateFromServerState();
+            setupRecipeUI(mainBox);
+
+            Scene scene = new Scene(login, 800, 600);
+            primaryStage.setScene(scene);
+            primaryStage.show();
+            login.autoLogin();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void thereWasAServerError() {
+        Alert alert = new Alert(AlertType.ERROR);
+        alert.initModality(Modality.APPLICATION_MODAL);
+        alert.setTitle("Failed to connect to the server");
+        alert.setHeaderText("Failed to connect to the server");
+        alert.setContentText(
+                "The server could be down, your internet might be broken, or there may be a solar flare ravaging civilization.");
+        alert.showAndWait();
+    }
+
+    public static boolean detectServerError(ServerConnectionSituation server) {
         try {
+            server.doServerStuff();
+        } catch (Exception e) {
+            return false;
+        }
+        return true;
+    }
+
+    public void updateFromServerState(){
+        ServerConnectionSituation situation = () -> {
             HttpClient client = HttpClient.newHttpClient();
             // Create the request object
             HttpRequest request = HttpRequest
@@ -525,29 +593,73 @@ public class App extends Application {
             for (Recipe r : state.getRecipes()) {
                 addRecipeUI(r);
             }
-        } catch (Exception e) {
+        };
+        if(!detectServerError(situation)) {
             System.err.println("Failed to update from remote state");
-            e.printStackTrace();
+            thereWasAServerError();
             state = new RecipeStateManager();
         }
     }
 
     public void writeServerState() {
-        String toSend = JSONOperations.intoJSONString(state);
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            // Create the request object
-            HttpRequest request = HttpRequest
-                    .newBuilder()
-                    .uri(new URI(App.serverURL + "/recipestate"))
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
-            // Send the request and receive the response
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) {
-            System.err.println("Failed to save remote state");
-            e.printStackTrace();
+        boolean succeeded = false;
+        while (!succeeded) {
+            String toSend = JSONOperations.intoJSONString(state);
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                // Create the request object
+                HttpRequest request = HttpRequest
+                        .newBuilder()
+                        .uri(new URI(App.serverURL + "/recipestate"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+                // Send the request and receive the response
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+                succeeded = true;
+            } catch (Exception e) {
+                System.err.println("Failed to save remote state");
+                // e.printStackTrace();
+            }
         }
+    }
+
+    @Override
+    public void stop() {
+        server.stopServer();
+    }
+
+    public void transitionToMainScreen() {
+        Scene scene = new Scene(mainBox, 1280, 720);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+    private void setupTitleBar(VBox mainBox) {
+        HBox titleHbox = new HBox();
+        titleHbox.setAlignment(Pos.CENTER_RIGHT);
+        Button newRecipe = new Button("New Recipe");
+        newRecipe.setMinHeight(50.0);
+
+        newRecipe.setOnMouseClicked(e -> {
+            ns = new newScreen();
+            ns.voiceInputScreen(this);
+        });
+
+        Region spacer = new Region();
+        spacer.setMinWidth(50.0);
+        titleHbox.getChildren().addAll(newRecipe, spacer);
+        mainBox.getChildren().add(titleHbox);
+    }
+
+    private void setupRecipeUI(VBox mainBox) {
+        recipesUI.setAlignment(Pos.TOP_CENTER);
+        ScrollPane pane = new ScrollPane();
+        pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
+            recipesUI.setPrefWidth(newValue.getWidth() - 1);
+        });
+        pane.setContent(recipesUI);
+        mainBox.getChildren().add(pane);
     }
 
     public void addRecipeUI(Recipe recipe) {
@@ -618,53 +730,77 @@ public class App extends Application {
 
         recipesUI.getChildren().add(0, recipePane);
     }
-
-    @Override
-    public void stop() {
-        server.stopServer();
-    }
-
-    @Override
-    public void start(Stage primaryStage) {
-        server.startServer();
-        primaryStage.setTitle("Recipe Run");
-
-        VBox mainBox = new VBox();
-        mainBox.setAlignment(Pos.TOP_CENTER);
-
-        // top titlebar
-        {
-            HBox titleHbox = new HBox();
-            titleHbox.setAlignment(Pos.CENTER_RIGHT);
-            Button newRecipe = new Button("New Recipe");
-            newRecipe.setMinHeight(50.0);
-
-            newRecipe.setOnMouseClicked(e -> {
-                ns = new newScreen();
-                ns.voiceInputScreen(this);
-            });
-
-            Region spacer = new Region();
-            spacer.setMinWidth(50.0);
-            titleHbox.getChildren().addAll(newRecipe, spacer);
-            mainBox.getChildren().add(titleHbox);
-        }
-
-        recipesUI = new VBox();
-
-        updateFromServerState();
-
-        recipesUI.setAlignment(Pos.TOP_CENTER);
-        // mainBox.getChildren().add(scrollPaneContents);
-        ScrollPane pane = new ScrollPane();
-        pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) -> {
-            recipesUI.setPrefWidth(newValue.getWidth() - 1);
-        });
-        pane.setContent(recipesUI);
-        mainBox.getChildren().add(pane);
-
-        Scene scene = new Scene(mainBox, 1280, 720);
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
 }
+// public class App extends Application {
+
+// private newScreen ns;
+// private DetailedViewScreen ds;
+// public static final String serverURL = "http://127.0.0.1:8100";
+
+// public static void main(String[] args) {
+// launch(args);
+// }
+
+// private RecipeStateManager state;
+
+// RecipeStateManager getState() {
+// return state;
+// }
+
+// public VBox recipesUI;
+
+// private String rName;
+// private String rDesc;
+// private RecipeKind rKind;
+// private Server server = new Server();
+
+// @Override
+// public void start(Stage primaryStage) {
+// server.startServer();
+// primaryStage.setTitle("Recipe Run");
+
+// VBox mainBox = new VBox();
+// mainBox.setAlignment(Pos.TOP_CENTER);
+
+// // top titlebar
+// {
+// HBox titleHbox = new HBox();
+// titleHbox.setAlignment(Pos.CENTER_RIGHT);
+// Button newRecipe = new Button("New Recipe");
+// newRecipe.setMinHeight(50.0);
+
+// newRecipe.setOnMouseClicked(e -> {
+// ns = new newScreen();
+// ns.voiceInputScreen(this);
+// });
+
+// Region spacer = new Region();
+// spacer.setMinWidth(50.0);
+// titleHbox.getChildren().addAll(newRecipe, spacer);
+// mainBox.getChildren().add(titleHbox);
+// }
+
+// recipesUI = new VBox();
+
+// updateFromServerState();
+
+// recipesUI.setAlignment(Pos.TOP_CENTER);
+// // mainBox.getChildren().add(scrollPaneContents);
+// ScrollPane pane = new ScrollPane();
+// pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) ->
+// {
+// recipesUI.setPrefWidth(newValue.getWidth() - 1);
+// });
+// pane.setContent(recipesUI);
+// mainBox.getChildren().add(pane);
+
+// Scene scene = new Scene(mainBox, 1280, 720);
+// primaryStage.setScene(scene);
+// primaryStage.show();
+// }
+// public void LoginSuccess(){
+// Stage stage = (Stage) mainBox.getScene().getWindow();
+// Scene scene = new Scene(mainBox, 1280, 720);
+// stage.setScene(scene);
+// stage.show();
+// }
