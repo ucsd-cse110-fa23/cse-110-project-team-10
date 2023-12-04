@@ -66,7 +66,6 @@ public class RecipeStateHandler implements HttpHandler{
             // }    
             //Create an update document for recipe
             try{
-                System.out.println(user);
                 Document recipe = new Document("$set", Document.parse(JSONOperations.intoJSONString(state)));
                 mongodb = new MongoDB_Account(URI);
                 mongodb.updateRecipetoAccount(user, recipe);
