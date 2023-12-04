@@ -17,7 +17,7 @@ public class Recipe {
         this.name = name;
         this.description = description;
         this.kind = kind;
-	this.img = img;
+        this.img = img;
     }
     Recipe() {}
 

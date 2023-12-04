@@ -629,6 +629,7 @@ public class App extends Application{
         try {
             server.doServerStuff();
         } catch (Exception e) {
+	    System.err.println("\n\n\n--------- SERVER ERROR ---------\n" + e.getStackTrace() + "\n\n\n");
             return false;
         }
         return true;
@@ -761,10 +762,16 @@ public class App extends Application{
 
         recipeHbox.setMinHeight(100.0);
 
+        Image foodImg = null;
+        try {
+            foodImg = new Image(recipe.getRecipeImage());
+        } catch(IllegalArgumentException e) {
+            // the img is not there or invalid, just don't display it
+        }
+        if(foodImg != null)
         {
             VBox recipeImage = new VBox();
-            String fimg = recipe.getRecipeImage();
-            Image foodImg = new Image(fimg);
+
             ImageView imageView = new ImageView(foodImg);
             recipeImage.getChildren().addAll(imageView);
             recipeImage.setAlignment(Pos.CENTER);
