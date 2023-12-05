@@ -6,8 +6,8 @@ app/server_audio.wav
 recipestest.json
 recipes.json
 gradle.properties
-account.csv
-account.json
+app/account.csv
+app/account.json
 app/recording.wav
 
 # This is a build file?
