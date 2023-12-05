@@ -263,7 +263,7 @@ public class LoginScreen extends BorderPane {
             }
             else{
                 lbox.saveAutoLoginInfo();
-                RecipeStateHandler.setUsername(user);
+                app.updateFromServerState();
                 app.transitionToMainScreen();
             }
         });
@@ -289,6 +289,7 @@ public class LoginScreen extends BorderPane {
                 user = lbox.userInfo();
                 pass = lbox.passInfo();
                 if(mongodb.LookUpAccount(user,pass)){
+                    app.updateFromServerState();
                     app.transitionToMainScreen();
                 }
             }

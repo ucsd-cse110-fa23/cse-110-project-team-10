@@ -18,35 +18,20 @@ public class RecipeStateHandler implements HttpHandler{
     private MongoDB_Account mongodb;
     private static String user;
     private final String URI = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
-    private final String saveFilePath = "account.csv";
 
     public RecipeStateHandler() throws IOException{
-        String savedData = "";
-
         mongodb = new MongoDB_Account(URI);
-        File f = new File(saveFilePath);
-        if(f.exists()){
-            BufferedReader br = new BufferedReader(new FileReader(saveFilePath));
-            savedData = br.readLine();
-            user = savedData.split(",")[0];
-            br.close();
-            state = mongodb.grabRecipeFromAccount(user);
-        }else{
-            if(user == null){
-                state = new RecipeStateManager();
-            }else{
-                state = mongodb.grabRecipeFromAccount(user);
-            }
-        }
-
-    }
-
-    public static void setUsername(String username) {
-        user = username;
     }
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        user = httpExchange.getRequestHeaders().getFirst("User");
+        if(user.isEmpty()){
+            state = new RecipeStateManager();
+        }else{
+            state = mongodb.grabRecipeFromAccount(user);
+        }
+
         String method = httpExchange.getRequestMethod();
         if (method.equals("GET")) {
             String response = JSONOperations.intoJSONString(state);
@@ -58,12 +43,7 @@ public class RecipeStateHandler implements HttpHandler{
             InputStream inputStream = httpExchange.getRequestBody();
             String requestBody = readInputStream(inputStream);
             state = JSONOperations.fromJSONString(requestBody);
-
-            // try (FileWriter fw = new FileWriter(saveFilePath)) {
-            //     fw.write(JSONOperations.intoJSONString(state));
-            // } catch (IOException e) {
-            //     e.printStackTrace();
-            // }    
+ 
             //Create an update document for recipe
             try{
                 Document recipe = new Document("$set", Document.parse(JSONOperations.intoJSONString(state)));
@@ -94,15 +74,3 @@ public class RecipeStateHandler implements HttpHandler{
     }
 
 }
-
-        // try {
-        //     savedData = new String(Files.readAllBytes(Paths.get(saveFilePath)));
-        // } catch (IOException e) {
-        //     System.out.println("Couldn't find saved file " + saveFilePath + " , making new save data");
-        // }
-        // if (savedData.length() > 0) {
-        //     System.out.println("Loading from " + saveFilePath);
-        //     state = JSONOperations.fromJSONString(savedData);
-        // } else {
-        //     state = new RecipeStateManager();
-        // }
