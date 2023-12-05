@@ -52,6 +52,8 @@ class postRecipeCreate extends VBox {
     public String pmt;
     public String pml;
 
+    public String oldRName;
+
     private Button saveRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
@@ -158,29 +160,32 @@ class postRecipeCreate extends VBox {
             }
         });
         refreshButton.setOnAction(e -> {
-            JSONObject toSend = new JSONObject();
-            toSend.put("pmt", pmt);
-            toSend.put("pml", pml);
-            try {
-                HttpClient client = HttpClient.newHttpClient();
-                // Create the request object
-                HttpRequest request = HttpRequest
-                        .newBuilder()
-                        .uri(new URI(App.serverURL + "/genrecipe"))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
-                // Send the request and receive the response
-                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-                // Process the response
-                String responseBody = response.body();
-                JSONObject responseJson = new JSONObject(responseBody);
-                rName = responseJson.getString("name");
-                rDesc = responseJson.getString("desc");
-                rKind = RecipeKind.valueOf(responseJson.getString("kind"));
-                rImg = responseJson.getString("img");
-            } catch (Exception ee) {
-                System.err.println("Failed to generate");
-                ee.printStackTrace();
+            oldRName = rName;
+            while (oldRName == rName) {
+                JSONObject toSend = new JSONObject();
+                toSend.put("pmt", pmt);
+                toSend.put("pml", pml);
+                try {
+                    HttpClient client = HttpClient.newHttpClient();
+                    // Create the request object
+                    HttpRequest request = HttpRequest
+                            .newBuilder()
+                            .uri(new URI(App.serverURL + "/genrecipe"))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+                    // Send the request and receive the response
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    // Process the response
+                    String responseBody = response.body();
+                    JSONObject responseJson = new JSONObject(responseBody);
+                    rName = responseJson.getString("name");
+                    rDesc = responseJson.getString("desc");
+                    rKind = RecipeKind.valueOf(responseJson.getString("kind"));
+                    rImg = responseJson.getString("img");
+                } catch (Exception ee) {
+                    System.err.println("Failed to generate");
+                    ee.printStackTrace();
+                }
             }
             recipeDescription.setText(rDesc);
             recipeImage.getChildren().clear();
