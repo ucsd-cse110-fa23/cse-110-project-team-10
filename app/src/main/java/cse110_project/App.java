@@ -49,6 +49,9 @@ class postRecipeCreate extends VBox {
     public RecipeKind rKind;
     public String rImg;
 
+    public String pmt;
+    public String pml;
+
     private Button saveRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
@@ -61,6 +64,8 @@ class postRecipeCreate extends VBox {
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
     public postRecipeCreate(String pmt, String pml) {
+        this.pmt = pmt; 
+        this.pml = pml;
         JSONObject toSend = new JSONObject();
         toSend.put("pmt", pmt);
         toSend.put("pml", pml);
@@ -113,29 +118,6 @@ class postRecipeCreate extends VBox {
     }
 
     public void postRecipeCreateDisplay(App app) {
-        saveRecipeButton.setOnAction(e -> {
-            String updatedDesc = recipeDescription.getText();
-            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind, rImg);
-
-            app.getState().addRecipe(newRecipe);
-            app.modifyUI();
-            app.writeServerState();
-
-            postCreateStage.close();
-        });
-        editRecipeButton.setOnAction(e -> {
-            if (editflag == false) {
-                editflag = true;
-                recipeDescription.setEditable(editflag);
-            } else {
-                editflag = false;
-                recipeDescription.setEditable(editflag);
-            }
-        });
-        backButton.setOnAction(e -> {
-            postCreateStage.close();
-        });
-
         HBox buttonArea = new HBox();
         buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, refreshButton, backButton);
         buttonArea.setPadding(new Insets(10, 10, 10, 10));
@@ -155,6 +137,62 @@ class postRecipeCreate extends VBox {
         ScrollPane sp = new ScrollPane(recipeDetail);
         sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
         sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+
+        saveRecipeButton.setOnAction(e -> {
+            String updatedDesc = recipeDescription.getText();
+            Recipe newRecipe = new Recipe(rName, updatedDesc, rKind, rImg);
+
+            app.getState().addRecipe(newRecipe);
+            app.modifyUI();
+            app.writeServerState();
+
+            postCreateStage.close();
+        });
+        editRecipeButton.setOnAction(e -> {
+            if (editflag == false) {
+                editflag = true;
+                recipeDescription.setEditable(editflag);
+            } else {
+                editflag = false;
+                recipeDescription.setEditable(editflag);
+            }
+        });
+        refreshButton.setOnAction(e -> {
+            JSONObject toSend = new JSONObject();
+            toSend.put("pmt", pmt);
+            toSend.put("pml", pml);
+            try {
+                HttpClient client = HttpClient.newHttpClient();
+                // Create the request object
+                HttpRequest request = HttpRequest
+                        .newBuilder()
+                        .uri(new URI(App.serverURL + "/genrecipe"))
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+                // Send the request and receive the response
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                // Process the response
+                String responseBody = response.body();
+                JSONObject responseJson = new JSONObject(responseBody);
+                rName = responseJson.getString("name");
+                rDesc = responseJson.getString("desc");
+                rKind = RecipeKind.valueOf(responseJson.getString("kind"));
+                rImg = responseJson.getString("img");
+            } catch (Exception ee) {
+                System.err.println("Failed to generate");
+                ee.printStackTrace();
+            }
+            recipeDescription.setText(rDesc);
+            recipeImage.getChildren().clear();
+            String nfimg = rImg;
+            Image nfoodImg = new Image(nfimg);
+            ImageView nimageView = new ImageView(nfoodImg);
+            recipeImage.getChildren().addAll(nimageView);
+            this.getChildren().addAll(buttonArea, sp, recipeImage);
+        });
+        backButton.setOnAction(e -> {
+            postCreateStage.close();
+        });
 
         this.getChildren().addAll(buttonArea, sp, recipeImage);
 
