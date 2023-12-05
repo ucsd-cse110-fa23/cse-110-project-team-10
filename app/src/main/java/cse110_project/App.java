@@ -52,6 +52,7 @@ class postRecipeCreate extends VBox {
     private Button saveRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
+    private Button refreshButton;
     private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
@@ -104,6 +105,10 @@ class postRecipeCreate extends VBox {
         backButton.setPrefSize(45, 15);
         backButton.setAlignment(Pos.CENTER);
 
+        refreshButton = new Button("refresh");
+        refreshButton.setPrefSize(70, 15);
+        refreshButton.setAlignment(Pos.CENTER);
+
         this.setPrefSize(500, 500);
     }
 
@@ -132,9 +137,9 @@ class postRecipeCreate extends VBox {
         });
 
         HBox buttonArea = new HBox();
-        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, refreshButton, backButton);
         buttonArea.setPadding(new Insets(10, 10, 10, 10));
-        buttonArea.setSpacing(199);
+        buttonArea.setSpacing(110);
 
         VBox recipeDetail = new VBox();
         recipeDetail.getChildren().addAll(recipeDescription);
