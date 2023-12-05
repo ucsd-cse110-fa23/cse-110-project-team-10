@@ -213,6 +213,7 @@ public class LoginScreen extends BorderPane {
     private Button createAccButton;
     private Button loginButton;
     private CheckBox autoLoginBox;
+    private boolean checkAuto;
 
     //view
     public LoginScreen(App app){
@@ -225,6 +226,7 @@ public class LoginScreen extends BorderPane {
         autoLoginBox = lbox.getAutoLoginBox();
         createAccButton = footer.getCreateAccButton();
         loginButton = footer.getLoginButton();
+        checkAuto = false;
 
         this.setCenter(lbox);
         this.setBottom(footer);
@@ -267,7 +269,14 @@ public class LoginScreen extends BorderPane {
         });
 
         autoLoginBox.setOnAction(e -> {
-            autoLoginBox.setSelected(true);
+            if(checkAuto == true){
+                checkAuto = false;
+                autoLoginBox.setSelected(false);
+            }
+            else{
+                checkAuto = true;
+                autoLoginBox.setSelected(true);
+            }
         });
     }
 
