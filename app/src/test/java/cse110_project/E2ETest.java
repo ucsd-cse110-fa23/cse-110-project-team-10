@@ -14,6 +14,8 @@ public class E2ETest {
     String testUser;
     String testPass;
     String URL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
+    String sandwichURL = "https://static.toiimg.com/thumb/83740315.cms?width=1200&height=900";
+    String noodleURL = "https://www.chilipeppermadness.com/wp-content/uploads/2023/06/Gochujang-Noodles-Recipe-SQ.jpg";
     MongoDB_Test testMongodb;
 
     Modify testModify;
@@ -84,4 +86,5 @@ public class E2ETest {
         assertEquals("d2", resultList.getRecipes().get(0).getRecipeName());
         assertEquals("d1", resultList.getRecipes().get(1).getRecipeName());
     }
+
 }
