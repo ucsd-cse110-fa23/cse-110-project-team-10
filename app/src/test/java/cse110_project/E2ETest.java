@@ -28,6 +28,7 @@ public class E2ETest {
     MongoDB_Test testMongodb;
     mockRecipeGenerate mockRecipe1;
     mockRecipeGenerate mockRecipe2;
+    mockImageGenerate mockImage;
 
     Modify testModify;
     RecipeStateManager testList;
@@ -56,6 +57,7 @@ public class E2ETest {
         testList.addRecipe(d2);
 
         testModify = new Modify(testList);
+        mockImage = new mockImageGenerate();
     }
 
     /**
@@ -78,9 +80,22 @@ public class E2ETest {
         String type = "type";
         String ingredient = "ingredient";
         mockRecipe1 = new mockRecipeGenerate(type, ingredient);
+        String recipe1 = mockRecipe1.generate();
 
         mockRecipe2 = new mockRecipeGenerate(type, ingredient);
+        String recipe2 = mockRecipe2.generate();
 
+        assertTrue(recipe1.contains(type));
+        assertTrue(recipe2.contains(type));
+        assertTrue(recipe1.contains(ingredient));
+        assertTrue(recipe2.contains(ingredient));
+
+        assertFalse(mockRecipe1 == mockRecipe2);
+
+        String imageURL = "image";
+        String image = mockImage.mockGenerate(imageURL);
+
+        Recipe r = new Recipe(recipe2, recipe2, RecipeKind.valueOf("breakfast"), image);
     }
 
     /**
@@ -154,5 +169,32 @@ public class E2ETest {
         }
         assertEquals("b2", resultList.getRecipes().get(0).getRecipeName());
         assertEquals("b1", resultList.getRecipes().get(1).getRecipeName());
+
+        //test regenerate
+        String type = "type";
+        String ingredient = "ingredient";
+        mockRecipe1 = new mockRecipeGenerate(type, ingredient);
+        String recipe1 = mockRecipe1.generate();
+
+        mockRecipe2 = new mockRecipeGenerate(type, ingredient);
+        String recipe2 = mockRecipe2.generate();
+
+        assertTrue(recipe1.contains(type));
+        assertTrue(recipe2.contains(type));
+        assertTrue(recipe1.contains(ingredient));
+        assertTrue(recipe2.contains(ingredient));
+
+        assertFalse(mockRecipe1 == mockRecipe2);
+
+        //test image preview
+        String imageURL = "image";
+        String image = mockImage.mockGenerate(imageURL);
+
+        Recipe r = new Recipe(recipe2, recipe2, RecipeKind.valueOf("breakfast"), image);
+
+        resultList.addRecipe(r);
+
+        assertEquals(recipe2, resultList.getRecipes().get(resultList.getRecipes().size()-1).getRecipeName());
+        assertEquals(image, resultList.getRecipes().get(resultList.getRecipes().size()-1).getRecipeImage());
     }
 }
