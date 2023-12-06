@@ -36,6 +36,11 @@ application {
     mainClass = 'cse110_project.App'
 }
 
+task runServer(type: JavaExec) {
+    main = 'cse110_project.ServerMain'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
 run {
     // Add VM options for JavaFX.
     jvmArgs = ['--module-path', project.property('javafx_path'), '--add-modules', 'javafx.controls,javafx.fxml']

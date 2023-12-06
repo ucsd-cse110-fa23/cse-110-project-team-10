@@ -709,7 +709,6 @@ public class App extends Application{
     private String rDesc;
 
     private RecipeStateManager state;
-    private Server server = new Server();
     private newScreen ns;
     private String rImg;
 
@@ -742,8 +741,6 @@ public class App extends Application{
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-
-        server.startServer();
         primaryStage.setTitle("Recipe Run");
 
         this.primaryStage = primaryStage;
@@ -857,11 +854,6 @@ public class App extends Application{
                 // e.printStackTrace();
             }
         }
-    }
-
-    @Override
-    public void stop() {
-        server.stopServer();
     }
 
     public void transitionToMainScreen() {
