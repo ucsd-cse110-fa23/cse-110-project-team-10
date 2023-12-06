@@ -28,6 +28,8 @@ import javafx.scene.control.Alert.AlertType;
 
 import java.nio.file.Paths;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -48,14 +50,19 @@ class postRecipeCreate extends VBox {
     public String rDesc;
     public RecipeKind rKind;
     public String rImg;
-
+    private int numButtons;
     private Button saveRecipeButton;
+    private Button shareRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
     private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
     private boolean editflag;
+    private ShareScreen share;
+    private HttpResponse<String> res;
+    JSONObject responseJson;
+    HttpRequest req;
 
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
@@ -71,11 +78,15 @@ class postRecipeCreate extends VBox {
                     .uri(new URI(App.serverURL + "/genrecipe"))
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+
+            req = request;
             // Send the request and receive the response
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println(HttpResponse.BodyHandlers.ofString());
+            res = response;
             // Process the response
             String responseBody = response.body();
-            JSONObject responseJson = new JSONObject(responseBody);
+            responseJson = new JSONObject(responseBody);
             rName = responseJson.getString("name");
             rDesc = responseJson.getString("desc");
             rKind = RecipeKind.valueOf(responseJson.getString("kind"));
@@ -93,16 +104,24 @@ class postRecipeCreate extends VBox {
         recipeDescription.setEditable(editflag);
 
         saveRecipeButton = new Button("save");
-        saveRecipeButton.setPrefSize(45, 15);
+        saveRecipeButton.setPrefSize(55, 15);
         saveRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++;
 
+        shareRecipeButton = new Button("share");
+        shareRecipeButton.setPrefSize(65, 15);
+        shareRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++;
+        
         editRecipeButton = new Button("edit");
-        editRecipeButton.setPrefSize(45, 15);
+        editRecipeButton.setPrefSize(55, 15);
         editRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++; 
 
         backButton = new Button("back");
-        backButton.setPrefSize(45, 15);
+        backButton.setPrefSize(55, 15);
         backButton.setAlignment(Pos.CENTER);
+        numButtons ++;
 
         this.setPrefSize(500, 500);
     }
@@ -118,6 +137,13 @@ class postRecipeCreate extends VBox {
 
             postCreateStage.close();
         });
+        shareRecipeButton.setOnAction(e -> {
+            share = new ShareScreen();
+            share.showScreen();
+            System.out.println(req);
+            // System.out.println(res);
+            // responseJson;
+        });
         editRecipeButton.setOnAction(e -> {
             if (editflag == false) {
                 editflag = true;
@@ -132,9 +158,9 @@ class postRecipeCreate extends VBox {
         });
 
         HBox buttonArea = new HBox();
-        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.getChildren().addAll(saveRecipeButton, shareRecipeButton, editRecipeButton, backButton);
         buttonArea.setPadding(new Insets(10, 10, 10, 10));
-        buttonArea.setSpacing(199);
+        buttonArea.setSpacing((500/numButtons) - 20);
 
         VBox recipeDetail = new VBox();
         recipeDetail.getChildren().addAll(recipeDescription);
@@ -415,9 +441,65 @@ class newScreen extends VBox {
     }
 }
 
+class ShareScreen extends VBox {
+    private Button copyButton;
+    private VBox copyLinkVBox;
+    private Scene newSc;
+    private Stage newSt;
+    private Button backLinkButton;
+    Clipboard clip;
+    ClipboardContent clipContent;
+
+    ShareScreen(){
+        copyButton = new Button("Copy Link");
+        backLinkButton = new Button("Back");
+        copyLinkVBox = new VBox(100);
+        copyLinkVBox.getChildren().addAll(backLinkButton, copyButton);
+        
+        
+        newSt = new Stage();
+        StackPane stackP = new StackPane();
+        stackP.getChildren().add(copyLinkVBox);
+        newSc = new Scene(stackP, 200, 200);
+        copyLinkVBox.setPadding(new Insets(10, 10, 10, 10));
+        copyLinkVBox.setAlignment(Pos.CENTER);
+        backLinkButton.setAlignment(Pos.TOP_RIGHT);
+
+        backLinkButton.setOnAction(e -> {
+            this.hideScreen();
+        });
+
+        copyButton.setOnAction(e -> {
+            clip = Clipboard.getSystemClipboard();
+            clipContent = new ClipboardContent();
+            clipContent.putString(App.serverURL + "/recipeweb");
+            clip.setContent(clipContent);
+        });
+
+        
+    }
+
+    public void showScreen(){
+        newSt.setScene(newSc);
+        newSt.show();
+    }
+
+    public void hideScreen(){
+        newSt.hide();
+    }
+
+    public void copyToClipboard(){
+        
+    }
+
+
+}
+
 class DetailedViewScreen extends VBox {
 
+    private int numButtons;
     private Button saveRecipeButton;
+    private Button shareRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
     private TextArea recipeDescription;
@@ -425,6 +507,7 @@ class DetailedViewScreen extends VBox {
     private Scene scene;
     private boolean saveflag;
     private Recipe tempR;
+    private ShareScreen share;
 
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
@@ -438,16 +521,24 @@ class DetailedViewScreen extends VBox {
         recipeDescription.setEditable(saveflag);
 
         saveRecipeButton = new Button("save");
-        saveRecipeButton.setPrefSize(45, 15);
+        saveRecipeButton.setPrefSize(55, 15);
         saveRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++;
+
+        shareRecipeButton = new Button("share");
+        shareRecipeButton.setPrefSize(65, 15);
+        shareRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++;
 
         editRecipeButton = new Button("edit");
-        editRecipeButton.setPrefSize(45, 15);
+        editRecipeButton.setPrefSize(55, 15);
         editRecipeButton.setAlignment(Pos.CENTER);
+        numButtons ++;
 
         backButton = new Button("back");
-        backButton.setPrefSize(45, 15);
+        backButton.setPrefSize(55, 15);
         backButton.setAlignment(Pos.CENTER);
+        numButtons ++;
 
         this.setPrefSize(500, 500);
     }
@@ -459,6 +550,10 @@ class DetailedViewScreen extends VBox {
             app.writeServerState();
 
             postCreateStage.close();
+        });
+        shareRecipeButton.setOnAction(e -> {
+            share = new ShareScreen();
+            share.showScreen();
         });
         editRecipeButton.setOnAction(e -> {
             if (saveflag == false) {
@@ -474,9 +569,9 @@ class DetailedViewScreen extends VBox {
         });
 
         HBox buttonArea = new HBox();
-        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, backButton);
+        buttonArea.getChildren().addAll(saveRecipeButton, shareRecipeButton, editRecipeButton, backButton);
         buttonArea.setPadding(new Insets(10, 10, 10, 10));
-        buttonArea.setSpacing(199);
+        buttonArea.setSpacing((500/numButtons) - 20);
 
         VBox recipeDetail = new VBox();
         recipeDetail.getChildren().addAll(recipeDescription);
@@ -595,6 +690,7 @@ public class App extends Application{
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+
         server.startServer();
         primaryStage.setTitle("Recipe Run");
 

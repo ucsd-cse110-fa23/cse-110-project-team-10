@@ -25,4 +25,13 @@ public class RecipeStateManager {
     public ArrayList<Recipe> getRecipes(){
         return recipes;
     }
+
+    public Recipe getRecipeByName(String name){
+        for(Recipe r : recipes){
+            if(r.getRecipeName().equals(name)){
+                return r;
+            }
+        }
+        return null;
+    }
 }
