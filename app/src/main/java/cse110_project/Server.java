@@ -59,6 +59,11 @@ public class Server {
             HttpContext context = server.createContext("/recipestate");
             context.setHandler(handler);
         }
+        {
+            RecipeWebHandler handler = new RecipeWebHandler();
+            HttpContext context = server.createContext("/recipeweb");
+            context.setHandler(handler);
+        }
 
         server.setExecutor(threadPoolExecutor);
         server.start();
