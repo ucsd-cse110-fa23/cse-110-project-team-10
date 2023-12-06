@@ -1,5 +1,6 @@
 # Team 10 App
 
+Github: https://github.com/ucsd-cse110-fa23/cse-110-project-team-10 
 
 # How to run
 Start the server with `./gradlew runServer`
