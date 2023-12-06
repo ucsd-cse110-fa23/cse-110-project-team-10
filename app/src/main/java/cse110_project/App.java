@@ -55,11 +55,15 @@ class postRecipeCreate extends VBox {
     private Button shareRecipeButton;
     private Button editRecipeButton;
     private Button backButton;
+    private Button refreshButton;
     private TextArea recipeDescription;
     private Stage postCreateStage;
     private Scene scene;
     private boolean editflag;
     private ShareScreen share;
+    String pmt;
+    String pml;
+    String oldRName;
     private HttpResponse<String> res;
     JSONObject responseJson;
     HttpRequest req;
@@ -67,6 +71,8 @@ class postRecipeCreate extends VBox {
     // display the generated recipe description in a new popout window
     // pmt = passed meal type, pml = passed meal ingredient list
     public postRecipeCreate(String pmt, String pml) {
+        this.pmt = pmt; 
+        this.pml = pml;
         JSONObject toSend = new JSONObject();
         toSend.put("pmt", pmt);
         toSend.put("pml", pml);
@@ -123,10 +129,34 @@ class postRecipeCreate extends VBox {
         backButton.setAlignment(Pos.CENTER);
         numButtons ++;
 
+        refreshButton = new Button("refresh");
+        refreshButton.setPrefSize(70, 15);
+        refreshButton.setAlignment(Pos.CENTER);
+
         this.setPrefSize(500, 500);
     }
 
     public void postRecipeCreateDisplay(App app) {
+        HBox buttonArea = new HBox();
+        buttonArea.getChildren().addAll(saveRecipeButton, editRecipeButton, refreshButton, backButton);
+        buttonArea.setPadding(new Insets(10, 10, 10, 10));
+        buttonArea.setSpacing(110);
+
+        VBox recipeDetail = new VBox();
+        recipeDetail.getChildren().addAll(recipeDescription);
+        recipeDetail.setPadding(new Insets(10, 10, 10, 10));
+
+        VBox recipeImage = new VBox();
+        String fimg = rImg;
+        Image foodImg = new Image(fimg);
+        ImageView imageView = new ImageView(foodImg);
+        recipeImage.getChildren().addAll(imageView);
+        recipeImage.setAlignment(Pos.CENTER);
+
+        ScrollPane sp = new ScrollPane(recipeDetail);
+        sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
+        sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
+
         saveRecipeButton.setOnAction(e -> {
             String updatedDesc = recipeDescription.getText();
             Recipe newRecipe = new Recipe(rName, updatedDesc, rKind, rImg);
@@ -153,29 +183,45 @@ class postRecipeCreate extends VBox {
                 recipeDescription.setEditable(editflag);
             }
         });
+        refreshButton.setOnAction(e -> {
+            oldRName = rName;
+            while (oldRName == rName) {
+                JSONObject toSend = new JSONObject();
+                toSend.put("pmt", pmt);
+                toSend.put("pml", pml);
+                try {
+                    HttpClient client = HttpClient.newHttpClient();
+                    // Create the request object
+                    HttpRequest request = HttpRequest
+                            .newBuilder()
+                            .uri(new URI(App.serverURL + "/genrecipe"))
+                            .header("Content-Type", "application/json")
+                            .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
+                    // Send the request and receive the response
+                    HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                    // Process the response
+                    String responseBody = response.body();
+                    JSONObject responseJson = new JSONObject(responseBody);
+                    rName = responseJson.getString("name");
+                    rDesc = responseJson.getString("desc");
+                    rKind = RecipeKind.valueOf(responseJson.getString("kind"));
+                    rImg = responseJson.getString("img");
+                } catch (Exception ee) {
+                    System.err.println("Failed to generate");
+                    ee.printStackTrace();
+                }
+            }
+            recipeDescription.setText(rDesc);
+            recipeImage.getChildren().clear();
+            String nfimg = rImg;
+            Image nfoodImg = new Image(nfimg);
+            ImageView nimageView = new ImageView(nfoodImg);
+            recipeImage.getChildren().addAll(nimageView);
+            this.getChildren().addAll(buttonArea, sp, recipeImage);
+        });
         backButton.setOnAction(e -> {
             postCreateStage.close();
         });
-
-        HBox buttonArea = new HBox();
-        buttonArea.getChildren().addAll(saveRecipeButton, shareRecipeButton, editRecipeButton, backButton);
-        buttonArea.setPadding(new Insets(10, 10, 10, 10));
-        buttonArea.setSpacing((500/numButtons) - 20);
-
-        VBox recipeDetail = new VBox();
-        recipeDetail.getChildren().addAll(recipeDescription);
-        recipeDetail.setPadding(new Insets(10, 10, 10, 10));
-
-        VBox recipeImage = new VBox();
-        String fimg = rImg;
-        Image foodImg = new Image(fimg);
-        ImageView imageView = new ImageView(foodImg);
-        recipeImage.getChildren().addAll(imageView);
-        recipeImage.setAlignment(Pos.CENTER);
-
-        ScrollPane sp = new ScrollPane(recipeDetail);
-        sp.setHbarPolicy(ScrollBarPolicy.AS_NEEDED);
-        sp.setVbarPolicy(ScrollBarPolicy.AS_NEEDED);
 
         this.getChildren().addAll(buttonArea, sp, recipeImage);
 
@@ -684,6 +730,7 @@ public class App extends Application{
     private RecipeStateManager modifiedList;
     private String sortCategory;
     private String mealType;
+    private LoginScreen login = new LoginScreen(this);
 
     public static void main(String[] args) {
         launch(args);
@@ -701,13 +748,11 @@ public class App extends Application{
 
         this.primaryStage = primaryStage;
 
-        LoginScreen login = new LoginScreen(this);
         mainBox = new VBox();
         mainBox.setAlignment(Pos.TOP_CENTER);
         setupTitleBar(mainBox);
 
         recipesUI = new VBox();
-        updateFromServerState();
         setupRecipeUI(mainBox);
 
         Scene scene = new Scene(login, 800, 600);
@@ -744,6 +789,7 @@ public class App extends Application{
                     .newBuilder()
                     .uri(new URI(App.serverURL + "/recipestate"))
                     .header("Content-Type", "application/json")
+                    .header("User", login.getLoginBox().userInfo())
                     .GET().build();
             // Send the request and receive the response
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -800,6 +846,7 @@ public class App extends Application{
                         .newBuilder()
                         .uri(new URI(App.serverURL + "/recipestate"))
                         .header("Content-Type", "application/json")
+                        .header("User", login.getLoginBox().userInfo())
                         .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
                 // Send the request and receive the response
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -930,76 +977,3 @@ public class App extends Application{
         recipesUI.getChildren().clear();
     }
 }
-// public class App extends Application {
-
-// private newScreen ns;
-// private DetailedViewScreen ds;
-// public static final String serverURL = "http://127.0.0.1:8100";
-
-// public static void main(String[] args) {
-// launch(args);
-// }
-
-// private RecipeStateManager state;
-
-// RecipeStateManager getState() {
-// return state;
-// }
-
-// public VBox recipesUI;
-
-// private String rName;
-// private String rDesc;
-// private RecipeKind rKind;
-// private Server server = new Server();
-
-// @Override
-// public void start(Stage primaryStage) {
-// server.startServer();
-// primaryStage.setTitle("Recipe Run");
-
-// VBox mainBox = new VBox();
-// mainBox.setAlignment(Pos.TOP_CENTER);
-
-// // top titlebar
-// {
-// HBox titleHbox = new HBox();
-// titleHbox.setAlignment(Pos.CENTER_RIGHT);
-// Button newRecipe = new Button("New Recipe");
-// newRecipe.setMinHeight(50.0);
-
-// newRecipe.setOnMouseClicked(e -> {
-// ns = new newScreen();
-// ns.voiceInputScreen(this);
-// });
-
-// Region spacer = new Region();
-// spacer.setMinWidth(50.0);
-// titleHbox.getChildren().addAll(newRecipe, spacer);
-// mainBox.getChildren().add(titleHbox);
-// }
-
-// recipesUI = new VBox();
-
-// updateFromServerState();
-
-// recipesUI.setAlignment(Pos.TOP_CENTER);
-// // mainBox.getChildren().add(scrollPaneContents);
-// ScrollPane pane = new ScrollPane();
-// pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) ->
-// {
-// recipesUI.setPrefWidth(newValue.getWidth() - 1);
-// });
-// pane.setContent(recipesUI);
-// mainBox.getChildren().add(pane);
-
-// Scene scene = new Scene(mainBox, 1280, 720);
-// primaryStage.setScene(scene);
-// primaryStage.show();
-// }
-// public void LoginSuccess(){
-// Stage stage = (Stage) mainBox.getScene().getWindow();
-// Scene scene = new Scene(mainBox, 1280, 720);
-// stage.setScene(scene);
-// stage.show();
-// }

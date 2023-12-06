@@ -1,4 +1,5 @@
 package cse110_project;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -29,11 +30,11 @@ class LoginFooter extends HBox {
     private Button createAccButton;
     private Button loginButton;
 
-    LoginFooter(){
+    LoginFooter() {
         String defaultButtonStyle = "-fx-font-style: italic; -fx-background-color: #FFFFFF;  -fx-font-weight: bold; -fx-font: 11 arial;";
 
         this.setPrefSize(500, 60);
-        this.setPadding(new Insets(0,0,100,0));
+        this.setPadding(new Insets(0, 0, 100, 0));
         this.setStyle("-fx-background-color: #F0F8FF;");
         this.setSpacing(10);
 
@@ -60,7 +61,7 @@ class LoginHeader extends HBox {
     LoginHeader() {
         this.setPrefSize(500, 60); // Size of the header
         this.setStyle("-fx-background-color: #F0F8FF;");
-        this.setPadding(new Insets(100,0,0,0));
+        this.setPadding(new Insets(100, 0, 0, 0));
         Text titleText = new Text("PantryPal 2"); // Text of the Header
         titleText.setStyle("-fx-font-weight: bold; -fx-font-size: 45;");
         this.getChildren().add(titleText);
@@ -68,23 +69,23 @@ class LoginHeader extends HBox {
     }
 }
 
-class LoginInfo extends HBox{
+class LoginInfo extends HBox {
     private Label infoLabel;
     private TextField userInfo;
 
-    LoginInfo(String label){
+    LoginInfo(String label) {
         infoLabel = new Label(label);
 
         userInfo = new TextField();
         userInfo.setPrefSize(380, 20);
         userInfo.setStyle("-fx-background-color: #DAE5EA; -fx-border-width: 0;");
         userInfo.setPadding(new Insets(10, 0, 10, 0));
-        
+
         this.getChildren().addAll(infoLabel, userInfo);
         this.setAlignment(Pos.CENTER);
     }
 
-    public TextField getUserInfo(){
+    public TextField getUserInfo() {
         return userInfo;
     }
 }
@@ -99,7 +100,7 @@ class LoginBox extends VBox {
     private boolean isMatch;
     private CheckBox autoLoginBox;
 
-    LoginBox(){
+    LoginBox() {
         this.setStyle("-fx-background-color: #F0F8FF;");
         this.setSpacing(5);
 
@@ -111,39 +112,38 @@ class LoginBox extends VBox {
 
         autoLoginBox = new CheckBox("Automatic Login");
         autoLoginBox.setIndeterminate(false);
-
         isMatch = false;
 
         this.getChildren().addAll(username, password, errorMessage, autoLoginBox);
         this.setAlignment(Pos.CENTER);
     }
 
-    public boolean passwordMatch(){
+    public boolean passwordMatch() {
         return isMatch;
     }
 
-    public String userInfo(){
+    public String userInfo() {
         return username.getUserInfo().getText();
     }
 
-    public String passInfo(){
+    public String passInfo() {
         return password.getUserInfo().getText();
     }
 
-    public String autoInfo(){
+    public String autoInfo() {
         return this.isAuto;
     }
 
-    public void setErrorMsg(String prompt){
+    public void setErrorMsg(String prompt) {
         errorMessage.setText(prompt);
     }
 
-    public CheckBox getAutoLoginBox(){
+    public CheckBox getAutoLoginBox() {
         return autoLoginBox;
     }
 
-    //saves account info
-    public void saveAutoLoginInfo(){
+    // saves account info
+    public void saveAutoLoginInfo() {
         try {
             FileWriter fw = new FileWriter("account.csv");
 
@@ -155,22 +155,37 @@ class LoginBox extends VBox {
         }
     }
 
-    //retrieves account info
-    public void loadLoginInfo(){
-        try{
+    // retrieves account info
+    public void loadLoginInfo() {
+        try {
             FileReader file = new FileReader("account.csv");
             BufferedReader br = new BufferedReader(file);
 
-            while(br.ready()){
+            while (br.ready()) {
                 String[] acc = br.readLine().split(",");
                 username.getUserInfo().setText(acc[0]);
                 password.getUserInfo().setText(acc[1]);
                 isAuto = acc[2];
             }
-            
+
             br.close();
+        } catch (Exception e) {
+            System.out.println(e);
         }
-        catch (Exception e){
+    }
+
+    public void loadLoginflag() {
+        try {
+            FileReader file = new FileReader("account.csv");
+            BufferedReader br = new BufferedReader(file);
+
+            while (br.ready()) {
+                String[] acc = br.readLine().split(",");
+                isAuto = acc[2];
+            }
+
+            br.close();
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
@@ -197,9 +212,10 @@ public class LoginScreen extends BorderPane {
     private Button createAccButton;
     private Button loginButton;
     private CheckBox autoLoginBox;
+    private boolean checkAuto;
 
-    //view
-    public LoginScreen(App app){
+    // view
+    public LoginScreen(App app) {
         lbox = new LoginBox();
         header = new LoginHeader();
         footer = new LoginFooter();
@@ -209,6 +225,7 @@ public class LoginScreen extends BorderPane {
         autoLoginBox = lbox.getAutoLoginBox();
         createAccButton = footer.getCreateAccButton();
         loginButton = footer.getLoginButton();
+        checkAuto = false;
 
         this.setCenter(lbox);
         this.setBottom(footer);
@@ -217,16 +234,16 @@ public class LoginScreen extends BorderPane {
         addListeners(app);
     }
 
-    public LoginFooter getFooter(){
+    public LoginFooter getFooter() {
         return footer;
     }
 
-    public LoginBox getLoginBox(){
+    public LoginBox getLoginBox() {
         return lbox;
     }
 
-    //controller
-    public void addListeners(App app){
+    // controller
+    public void addListeners(App app) {
         createAccButton.setOnAction(e -> {
             createscreen = new CreateAccScreen(this);
             this.setCenter(createscreen.getCreateBox());
@@ -239,34 +256,41 @@ public class LoginScreen extends BorderPane {
             app.curUsername = user;
             app.curPassword = pass;
 
-            if(user.isEmpty() || pass.isEmpty()){
+            if (user.isEmpty() || pass.isEmpty()) {
                 lbox.setErrorMsg(EMPTY_FIELD_ERROR);
-            }
-            else if(!mongodb.LookUpAccount(user, pass)){ //check password
+            } else if (!mongodb.LookUpAccount(user, pass)) { // check password
                 lbox.setErrorMsg(ACC_ERROR);
-            }
-            else{
+            } else {
                 lbox.saveAutoLoginInfo();
-                RecipeStateHandler.setUsername(user);
+                app.updateFromServerState();
                 app.transitionToMainScreen();
             }
         });
 
         autoLoginBox.setOnAction(e -> {
-            autoLoginBox.setSelected(true);
+            if (checkAuto == true) {
+                checkAuto = false;
+                autoLoginBox.setSelected(false);
+            } else {
+                checkAuto = true;
+                autoLoginBox.setSelected(true);
+            }
         });
     }
 
-    
-
-    public void autoLogin(){
-        lbox.loadLoginInfo();
-        user = lbox.userInfo();
-        pass = lbox.passInfo();
+    public void autoLogin() {
+        lbox.loadLoginflag();
         isAuto = lbox.autoInfo();
-        if(isAuto != null){
-            if(isAuto.equals("true")){
-                if(mongodb.LookUpAccount(user,pass)){
+        if (isAuto != null) {
+            if (isAuto.equals("true")) {
+                lbox.loadLoginInfo();
+                user = lbox.userInfo();
+                pass = lbox.passInfo();
+                app.curUsername = user;
+                app.curPassword = pass;
+
+                if (mongodb.LookUpAccount(user, pass)) {
+                    app.updateFromServerState();
                     app.transitionToMainScreen();
                 }
             }
