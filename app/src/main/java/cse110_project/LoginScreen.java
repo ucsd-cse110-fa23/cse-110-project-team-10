@@ -214,7 +214,7 @@ public class LoginScreen extends BorderPane {
         this.setBottom(footer);
         this.setTop(header);
 
-        addListeners();
+        addListeners(app);
     }
 
     public LoginFooter getFooter(){
@@ -226,7 +226,7 @@ public class LoginScreen extends BorderPane {
     }
 
     //controller
-    public void addListeners(){
+    public void addListeners(App app){
         createAccButton.setOnAction(e -> {
             createscreen = new CreateAccScreen(this);
             this.setCenter(createscreen.getCreateBox());
@@ -236,6 +236,8 @@ public class LoginScreen extends BorderPane {
         loginButton.setOnAction(e -> {
             user = lbox.userInfo();
             pass = lbox.passInfo();
+            app.curUsername = user;
+            app.curPassword = pass;
 
             if(user.isEmpty() || pass.isEmpty()){
                 lbox.setErrorMsg(EMPTY_FIELD_ERROR);

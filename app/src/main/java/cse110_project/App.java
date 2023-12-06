@@ -138,7 +138,7 @@ class postRecipeCreate extends VBox {
             postCreateStage.close();
         });
         shareRecipeButton.setOnAction(e -> {
-            share = new ShareScreen();
+            share = new ShareScreen(app.curUsername, rName);
             share.showScreen();
             System.out.println(req);
             // System.out.println(res);
@@ -450,7 +450,7 @@ class ShareScreen extends VBox {
     Clipboard clip;
     ClipboardContent clipContent;
 
-    ShareScreen(){
+    ShareScreen(String user, String recipeName){
         copyButton = new Button("Copy Link");
         backLinkButton = new Button("Back");
         copyLinkVBox = new VBox(100);
@@ -472,7 +472,8 @@ class ShareScreen extends VBox {
         copyButton.setOnAction(e -> {
             clip = Clipboard.getSystemClipboard();
             clipContent = new ClipboardContent();
-            clipContent.putString(App.serverURL + "/recipeweb");
+            RecipeQuery query = new RecipeQuery(user, recipeName);
+            clipContent.putString(App.serverURL + query.turnIntoURI());
             clip.setContent(clipContent);
         });
 
@@ -552,7 +553,7 @@ class DetailedViewScreen extends VBox {
             postCreateStage.close();
         });
         shareRecipeButton.setOnAction(e -> {
-            share = new ShareScreen();
+            share = new ShareScreen(app.curUsername, tempR.getRecipeName());
             share.showScreen();
         });
         editRecipeButton.setOnAction(e -> {
@@ -653,6 +654,10 @@ interface ServerConnectionSituation {
 public class App extends Application{
 
     public static final String serverURL = "http://127.0.0.1:8100";
+    public static final String mongoURL = "mongodb+srv://zpliang:LoveMinatoAqua12315@violentevergarden.vm9uhtb.mongodb.net/?retryWrites=true&w=majority";
+
+    public String curUsername = "";
+    public String curPassword = "";
 
     private String rName;
     private String rDesc;
