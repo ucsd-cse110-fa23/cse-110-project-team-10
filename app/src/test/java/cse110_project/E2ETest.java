@@ -58,6 +58,19 @@ public class E2ETest {
     }
 
     /**
+     * Integration test for filtering based on meal tag.
+     */
+    @Test
+    public void filterLunchMealTag() throws Exception {
+        resultList = testModify.modify("lunch", "default: most recent");
+        for(Recipe r : resultList.getRecipes()){
+            assertEquals(RecipeKind.valueOf("lunch"), r.getRecipeKind());
+        }
+
+        assertEquals(1, resultList.getRecipes().size());
+    }
+
+    /**
      * Integration test for filtering breakfast and sorting alphabetically.
      */
     @Test
