@@ -12,16 +12,38 @@ import java.beans.Transient;
 import org.junit.jupiter.api.BeforeEach;
 
 public class MealTagTest {
+    Recipe b;
+    Recipe l;
+    Recipe d;
 
-    @Test
-    public void mealTagTest() {
-        Recipe b = new Recipe("b", "b", RecipeKind.valueOf("breakfast"), "");
-        Recipe l = new Recipe("l", "l", RecipeKind.valueOf("lunch"), "");
-        Recipe d = new Recipe("d", "d", RecipeKind.valueOf("dinner"), "");
-
-        assertEquals("breakfast", b.getRecipeKind().name());
-        assertEquals("lunch", l.getRecipeKind().name());
-        assertEquals("dinner", d.getRecipeKind().name());
-
+    @BeforeEach
+    public void setup() {
+        b = new Recipe("b", "b", RecipeKind.valueOf("breakfast"), "");
+        l = new Recipe("l", "l", RecipeKind.valueOf("lunch"), "");
+        d = new Recipe("d", "d", RecipeKind.valueOf("dinner"), "");
     }   
+
+    /*
+     * Test breakfast meal tag
+     */
+    @Test
+    public void breakfastTagTest(){
+        assertEquals("breakfast", b.getRecipeKind().name());
+    }
+
+    /*
+     * Test lunch meal tag
+     */
+    @Test
+    public void lunchTagTest(){
+        assertEquals("lunch", l.getRecipeKind().name());
+    }
+
+    /*
+     * Test dinner meal tag
+     */
+    @Test
+    public void dinnerTagTest(){
+        assertEquals("dinner", d.getRecipeKind().name());
+    }
 }
