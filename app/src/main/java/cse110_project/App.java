@@ -632,6 +632,7 @@ public class App extends Application{
     private RecipeStateManager modifiedList;
     private String sortCategory;
     private String mealType;
+    private LoginScreen login = new LoginScreen(this);
 
     public static void main(String[] args) {
         launch(args);
@@ -648,13 +649,11 @@ public class App extends Application{
 
         this.primaryStage = primaryStage;
 
-        LoginScreen login = new LoginScreen(this);
         mainBox = new VBox();
         mainBox.setAlignment(Pos.TOP_CENTER);
         setupTitleBar(mainBox);
 
         recipesUI = new VBox();
-        updateFromServerState();
         setupRecipeUI(mainBox);
 
         Scene scene = new Scene(login, 800, 600);
@@ -691,6 +690,7 @@ public class App extends Application{
                     .newBuilder()
                     .uri(new URI(App.serverURL + "/recipestate"))
                     .header("Content-Type", "application/json")
+                    .header("User", login.getLoginBox().userInfo())
                     .GET().build();
             // Send the request and receive the response
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -747,6 +747,7 @@ public class App extends Application{
                         .newBuilder()
                         .uri(new URI(App.serverURL + "/recipestate"))
                         .header("Content-Type", "application/json")
+                        .header("User", login.getLoginBox().userInfo())
                         .POST(HttpRequest.BodyPublishers.ofString(toSend.toString())).build();
                 // Send the request and receive the response
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -877,76 +878,3 @@ public class App extends Application{
         recipesUI.getChildren().clear();
     }
 }
-// public class App extends Application {
-
-// private newScreen ns;
-// private DetailedViewScreen ds;
-// public static final String serverURL = "http://127.0.0.1:8100";
-
-// public static void main(String[] args) {
-// launch(args);
-// }
-
-// private RecipeStateManager state;
-
-// RecipeStateManager getState() {
-// return state;
-// }
-
-// public VBox recipesUI;
-
-// private String rName;
-// private String rDesc;
-// private RecipeKind rKind;
-// private Server server = new Server();
-
-// @Override
-// public void start(Stage primaryStage) {
-// server.startServer();
-// primaryStage.setTitle("Recipe Run");
-
-// VBox mainBox = new VBox();
-// mainBox.setAlignment(Pos.TOP_CENTER);
-
-// // top titlebar
-// {
-// HBox titleHbox = new HBox();
-// titleHbox.setAlignment(Pos.CENTER_RIGHT);
-// Button newRecipe = new Button("New Recipe");
-// newRecipe.setMinHeight(50.0);
-
-// newRecipe.setOnMouseClicked(e -> {
-// ns = new newScreen();
-// ns.voiceInputScreen(this);
-// });
-
-// Region spacer = new Region();
-// spacer.setMinWidth(50.0);
-// titleHbox.getChildren().addAll(newRecipe, spacer);
-// mainBox.getChildren().add(titleHbox);
-// }
-
-// recipesUI = new VBox();
-
-// updateFromServerState();
-
-// recipesUI.setAlignment(Pos.TOP_CENTER);
-// // mainBox.getChildren().add(scrollPaneContents);
-// ScrollPane pane = new ScrollPane();
-// pane.viewportBoundsProperty().addListener((observable, oldValue, newValue) ->
-// {
-// recipesUI.setPrefWidth(newValue.getWidth() - 1);
-// });
-// pane.setContent(recipesUI);
-// mainBox.getChildren().add(pane);
-
-// Scene scene = new Scene(mainBox, 1280, 720);
-// primaryStage.setScene(scene);
-// primaryStage.show();
-// }
-// public void LoginSuccess(){
-// Stage stage = (Stage) mainBox.getScene().getWindow();
-// Scene scene = new Scene(mainBox, 1280, 720);
-// stage.setScene(scene);
-// stage.show();
-// }

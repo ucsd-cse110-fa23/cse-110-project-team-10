@@ -111,7 +111,6 @@ class LoginBox extends VBox {
 
         autoLoginBox = new CheckBox("Automatic Login");
         autoLoginBox.setIndeterminate(false);
-
         isMatch = false;
 
         this.getChildren().addAll(username, password, errorMessage, autoLoginBox);
@@ -175,6 +174,23 @@ class LoginBox extends VBox {
         }
     }
 
+    public void loadLoginflag(){
+        try{
+            FileReader file = new FileReader("account.csv");
+            BufferedReader br = new BufferedReader(file);
+
+            while(br.ready()){
+                String[] acc = br.readLine().split(",");
+                isAuto = acc[2];
+            }
+            
+            br.close();
+        }
+        catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
 }
 
 public class LoginScreen extends BorderPane {
@@ -197,6 +213,7 @@ public class LoginScreen extends BorderPane {
     private Button createAccButton;
     private Button loginButton;
     private CheckBox autoLoginBox;
+    private boolean checkAuto;
 
     //view
     public LoginScreen(App app){
@@ -209,6 +226,7 @@ public class LoginScreen extends BorderPane {
         autoLoginBox = lbox.getAutoLoginBox();
         createAccButton = footer.getCreateAccButton();
         loginButton = footer.getLoginButton();
+        checkAuto = false;
 
         this.setCenter(lbox);
         this.setBottom(footer);
@@ -245,26 +263,33 @@ public class LoginScreen extends BorderPane {
             }
             else{
                 lbox.saveAutoLoginInfo();
-                RecipeStateHandler.setUsername(user);
+                app.updateFromServerState();
                 app.transitionToMainScreen();
             }
         });
 
         autoLoginBox.setOnAction(e -> {
-            autoLoginBox.setSelected(true);
+            if(checkAuto == true){
+                checkAuto = false;
+                autoLoginBox.setSelected(false);
+            }
+            else{
+                checkAuto = true;
+                autoLoginBox.setSelected(true);
+            }
         });
     }
 
-    
-
     public void autoLogin(){
-        lbox.loadLoginInfo();
-        user = lbox.userInfo();
-        pass = lbox.passInfo();
+        lbox.loadLoginflag();
         isAuto = lbox.autoInfo();
         if(isAuto != null){
             if(isAuto.equals("true")){
+                lbox.loadLoginInfo();
+                user = lbox.userInfo();
+                pass = lbox.passInfo();
                 if(mongodb.LookUpAccount(user,pass)){
+                    app.updateFromServerState();
                     app.transitionToMainScreen();
                 }
             }
