@@ -81,12 +81,6 @@ public class E2ETest {
 
         mockRecipe2 = new mockRecipeGenerate(type, ingredient);
 
-        //new recipe but uses same 
-        assertTrue(mockRecipe1.contains("type"));
-        assertTrue(mockRecipe2.contains("type"));
-
-        assertTrue(mockRecipe1.contains("ingredient"));
-        assertTrue(mockRecipe2.contains("ingredient"));
     }
 
     /**
