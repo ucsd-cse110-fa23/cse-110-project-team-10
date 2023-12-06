@@ -15,8 +15,7 @@ public class RecipeWebHandler implements HttpHandler {
             RecipeQuery query = new RecipeQuery(exchange.getRequestURI());
             MongoDB_Account acc = new MongoDB_Account(App.mongoURL);
             RecipeStateManager thisState = acc.grabRecipeFromAccount(query.user);
-            Recipe r = thisState.getRecipeByName(query.recipeName);
-            String response = "<html><body><p>Recipe name: " + r.getRecipeName() + "</p><p>Recipe description: " + r.getRecipeDescription() + "</p><img src=\"" + r.getRecipeImage() + "\"></img>";
+            String response = query.renderHtml(thisState);
             exchange.sendResponseHeaders(200, response.length());
             OutputStream outStream = exchange.getResponseBody();
             outStream.write(response.getBytes());
@@ -37,6 +36,13 @@ class RecipeQuery {
     String user, recipeName = "";
 
     RecipeQuery() {
+    }
+
+    String renderHtml(RecipeStateManager thisState) {
+        Recipe r = thisState.getRecipeByName(recipeName);
+        String response = "<html><body><p>Recipe name: " + r.getRecipeName() + "</p><p>Recipe description: "
+                + r.getRecipeDescription() + "</p><img src=\"" + r.getRecipeImage() + "\"></img>";
+        return response;
     }
 
     RecipeQuery(String u, String r) {
