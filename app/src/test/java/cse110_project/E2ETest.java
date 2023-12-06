@@ -7,7 +7,16 @@ import cse110_project.Modify;
 import cse110_project.Recipe;
 import cse110_project.RecipeStateManager;
 
+import com.mongodb.client.*;
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import static com.mongodb.client.model.Filters.*;
+import org.json.*;
+
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.beans.Transient;
+
 import org.junit.jupiter.api.BeforeEach;
 
 public class E2ETest {
@@ -96,5 +105,37 @@ public class E2ETest {
 
         assertEquals("d2", resultList.getRecipes().get(0).getRecipeName());
         assertEquals("d1", resultList.getRecipes().get(1).getRecipeName());
+    }
+
+    /*
+     * E2E Scenario Test
+     */
+    @Test
+    public void scenarioTest() {
+        //create account
+        assertFalse(testMongodb.LookUpAccount(testUser, testPass));
+        testMongodb.CreateAccount(testUser, testPass);
+
+        //login
+        assertTrue(testMongodb.LookUpAccount(testUser, testPass));
+
+        //store recipe to account
+        Document recipe = new Document("$set", Document.parse(JSONOperations.intoJSONString(testList)));
+        testMongodb.updateRecipetoAccount(testUser, recipe);
+
+        //get recipe from corresponding account
+        resultList = testMongodb.grabRecipeFromAccount(testUser);
+        for(int i = 0; i < resultList.getRecipes().size(); i++){
+            assertEquals(testList.getRecipes().get(i).getRecipeName(), resultList.getRecipes().get(i).getRecipeName());
+        }
+
+        //filter and sort list
+        Modify mTest = new Modify(resultList);
+        resultList = mTest.modify("breakfast", "z-a");
+        for(Recipe r : resultList.getRecipes()){
+            assertEquals(RecipeKind.valueOf("breakfast"), r.getRecipeKind());
+        }
+        assertEquals("b2", resultList.getRecipes().get(0).getRecipeName());
+        assertEquals("b1", resultList.getRecipes().get(1).getRecipeName());
     }
 }
